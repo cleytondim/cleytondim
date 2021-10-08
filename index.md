@@ -1,39 +1,39 @@
 ## Hello \o
 
-## Welcome to GitHub Pages
+## I'm Cleyton Dim, and this is my Portfolio Page
 
-You can use the [editor on GitHub](https://github.com/cleytondim/cleytondim/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+Here I will be showing some activities and projects that I participated in, in descending temporal order.
+____________________________________________________________________________________________________________
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
 
-### Markdown
+![Image](sigaa.jpg)
+### SIGAA
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+SIGAA is an integrated academic management system used in several universities. My main role is in the development of new features in the system at one of the universities.
+____________________________________________________________________________________________________________
 
-```markdown
-Syntax highlighted code block
+![Image](horncheck.png)
 
-# Header 1
-## Header 2
-### Header 3
+### HORNCHECK
 
-- Bulleted
-- List
+Horncheck is a prototype car horn detector, developed as one of the steps in the investigation of machine learning models for the conclusion of my Ph.D.
+For more details see [Google Play Link](https://play.google.com/store/apps/details?id=com.dimsoluts.horncheck).
+____________________________________________________________________________________________________________
 
-1. Numbered
-2. List
+![Image](pzero.png)
+### P-ZERO: ESCAPE
 
-**Bold** and _Italic_ and `Code` text
+P-Zero: Escape was a game developed for android purely in Java, with its own game engine built in java. It is a 2D third person shooter game.
+For more details see [Google Play Link](https://play.google.com/store/apps/details?id=dim.android.pzero).
+____________________________________________________________________________________________________________
 
-[Link](url) and ![Image](src)
-```
+### APIN
+![Image](apin.png)
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+APIN was an educational game for teaching logic programming, developed in Java Applets, where the user must build a block of commands, which will be executed to solve missions in the game. It was developed as part of my Master's thesis.
 
-### Jekyll Themes
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/cleytondim/cleytondim/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
 
-### Support or Contact
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+
+

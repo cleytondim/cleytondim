@@ -3,6 +3,7 @@
 ## I'm Cleyton Dim, and this is my Portfolio Page
 
 Here I will be showing some activities and projects that I participated in, in descending temporal order.
+
 ____________________________________________________________________________________________________________
 
 

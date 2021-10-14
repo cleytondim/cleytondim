@@ -62,7 +62,7 @@ main{
 .linha{
 margin-top: 8px;
 width: 80px;
-border-top: 2px solid;
+border: 2px solid;
 }
 
 .exp .linha{

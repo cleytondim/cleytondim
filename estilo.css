@@ -24,7 +24,8 @@ body{
 }
 
 header{
-  background-color: white
+  background-color: white;
+  padding: 16px 64px;
 }
 
 .headzin{

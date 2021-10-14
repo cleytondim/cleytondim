@@ -1,4 +1,4 @@
-h1, h2, h3 {
+h1, h2, h3, p, body {
   margin: 0;
 }
 
@@ -20,7 +20,6 @@ p {
 
 body{
   background-color: #E5E5E5;
-  margin: 0;
   padding: 0;
 }
 
@@ -40,5 +39,5 @@ header{
   border: 5px solid #00BFFF;
   border-radius: 50%;
   margin-bottom: -130px;
-  margin-right: 32px;
+  margin-right: 24px;
 }

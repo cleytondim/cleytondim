@@ -31,4 +31,5 @@ header{
   width: 8%;
   height: auto;
   border: 5px solid #FFC700;
+  border-radius: 50%;
 }

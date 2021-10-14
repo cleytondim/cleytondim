@@ -58,13 +58,14 @@ main{
 .linha{
 margin-top: 5px;
 width: 80px;
-
+border-top: 2px solid;
 }
 
-.linhab{
-border-top: 2px solid #00008B;
+.exp .linha{
+border-color: #00008B;
 }
 
-.linhaa{
-border-top: 2px solid #FFD700;
+
+.study .linha{
+border-color: #FFD700;
 }

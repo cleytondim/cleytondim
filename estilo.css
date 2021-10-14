@@ -21,3 +21,6 @@ body{
 header{
   background-color: white
 }
+.headzin{
+  display: inline-block
+}

@@ -15,8 +15,13 @@ h1 span {
 p {
   font-family: "Open Sans", sans-serif;
   font-size: 24px;
-  color: rgba(10,10,10,0.6);
+  
 }
+
+.t60 {
+  color: rgba(0,0,0,0.6);
+}
+
 
 body{
   background-color: #E5E5E5;

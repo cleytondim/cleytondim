@@ -21,6 +21,7 @@ p {
 body{
   background-color: #E5E5E5;
   margin: 0;
+  padding: 0;
 }
 
 header{
@@ -30,7 +31,6 @@ header{
 
 .headzin{
   display: inline-block;
-  padding: 10px;
 }
 
 .foto{
@@ -38,4 +38,5 @@ header{
   height: auto;
   border: 5px solid #00BFFF;
   border-radius: 50%;
+  margin-botton: -100px;
 }

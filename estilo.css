@@ -45,6 +45,11 @@
   header{
     background-color: white;
     padding: 32px 64px;
+    display: flex;
+  }
+
+  .dados {
+    margin-top: 3.75em;
   }
   
   .headzin{

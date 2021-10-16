@@ -293,7 +293,6 @@
       padding: 57.6px;
       text-align: center;
       font-family: "Open Sans", sans-serif;
-      display:flex;
-      justify-content: center;
+      width: 100%;
     }
 

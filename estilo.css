@@ -12,7 +12,19 @@
     font-weight: normal;
   }
   
-  h1 span {
+  .pessoa, h2 {
+  margin: 0;
+  font-family: "Playfair Display", serif;
+}
+
+.pessoa {
+  font-size: 4em;
+  margin-bottom: 1rem;
+}
+
+  .pessoa h1 {
+    display: inline;
+    font-size: 1em;
     font-weight: bold;
   }
 
@@ -29,7 +41,9 @@
   }
 
   .profissao{
-    font-size: 18px;
+    /* font-size: 18px; */
+    font-size: 1.5em;
+    margin-left: 5px;
   }
   
   .t60 {
@@ -43,18 +57,13 @@
   }
   
   header{
+    padding: 2.5em 4.375em;
     background-color: white;
-    padding: 32px 64px;
     display: flex;
   }
 
-  .dados {
-    margin-top: 3.75em;
-  }
-  
   .headzin{
-    display: inline-block;
-    padding: 10px;
+    margin-top: 3.75em;
   }
   
   .foto{

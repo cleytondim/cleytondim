@@ -1,7 +1,13 @@
-* {
-  box-sizing: border-box;
-}
+*{
+    /*border: 2px solid red;*/
+  }
   
+  body{
+    font-family: "Open Sans", sans-serif;
+    background-color: #e5e5e5;
+    margin: 0;
+  }
+
   h1, h2, h3, p, body {
     margin: 0;
   }
@@ -51,10 +57,6 @@
   }
   
   
-  body{
-    background-color: #E5E5E5;
-    padding: 0;
-  }
   
   header{
     padding: 2.5em 4.375em;

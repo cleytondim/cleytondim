@@ -8,10 +8,29 @@
     margin: 0;
   }
 
-  h1, h2, h3, p, body {
+  h1, h2, h3, p {
     margin: 0;
   }
+
+  header{
+    padding: 2.5em 4.375em;
+    background-color: white;
+    display: flex;
+  }
   
+  .headzin{
+    margin-top: 3.75em;
+  }
+  
+  img.foto{
+    width: 18em;
+    height: auto;
+    border: 5px solid #00BFFF;
+    border-radius: 50%;
+    margin-bottom: -6em;
+    margin-right: 1.5em;
+  }
+
   h1 {
     font-family: "Playfair Display", serif;
     font-size: 54px;
@@ -56,26 +75,7 @@
     color: rgba(0,0,0,0.6);
   }
   
-  
-  
-  header{
-    padding: 2.5em 4.375em;
-    background-color: white;
-    display: flex;
-  }
 
-  .headzin{
-    margin-top: 3.75em;
-  }
-  
-  .foto{
-    width: 16%;
-    height: auto;
-    border: 5px solid #00BFFF;
-    border-radius: 50%;
-    margin-bottom: -130px;
-    margin-right: 24px;
-  }
   
   main{
     padding: 90px 70px;

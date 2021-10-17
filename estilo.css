@@ -78,13 +78,15 @@
 
   
   main{
-    padding: 90px 70px;
+    padding: 2.5em 4.375em 1.5em;
     display: flex;
   }
   
   .colunamenor{
-    margin-top: 48px;
-    width: 288px;
+    padding-top: 3em;
+    width: 18em;
+    flex: 0 0 auto;
+    margin-right: 1.5em;
   }
   
   .linha{

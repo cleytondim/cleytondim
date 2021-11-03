@@ -1,7 +1,7 @@
 - 👋 Hi, I’m @cleytondim
 - 👀 I’m interested in Software Development, GameDev and scientific researchs
-- 🌱 I’m currently learning Unity and Android Dev.
-- 💞️ I’m looking to collaborate on GameDev
+- 🌱 I’m currently learning Microservices, Unity and Android Dev.
+- 💞️ I’m looking to collaborate on Software Development and GameDev
 - 📫 How to reach me: mail to cleytondim@gmail.com
 
 <!---

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Comparativo da FORJA CLASSE 4</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .topo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .campo {
+      flex: 1 1 calc(25% - 20px);
+      min-width: 240px;
+    }
+
+    label {
+      display: block;
+      margin-top: 5px;
+      font-weight: bold;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 3px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #333;
+      color: white;
+    }
+
+    .mais-vantajoso {
+      background-color: #a4dba4;
+    }
+
+    .mais-vantajoso-plus {
+      background-color: #add8e6;
+    }
+
+    .nota {
+      font-size: 0.9em;
+      margin-top: 15px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+<div class="topo">
+  <h1>Comparador de Forja</h1>
+  <button onclick="gerarCalculos()">Calcular</button>
+</div>
+
+<form id="formDados" onsubmit="return false;">
+  <div class="campo">
+    <label for="tierAlvo">TIER ALVO:</label>
+    <input type="number" id="tierAlvo" value="3" min="1" required />
+  </div>
+
+  <div class="campo" style="display:none;">
+    <label for="tierAtual">TIER Atual:</label>
+    <input type="number" id="tierAtual" value="0" min="1" required />
+  </div>
+
+  <div class="campo">
+    <label for="precoMainItem">Preço MAIN (em KK):</label>
+    <input type="number" id="precoMainItem" value="5" min="1" required />
+  </div>
+
+  <div class="campo">
+    <label for="precoMinorItem">Preço Minor (em KK):</label>
+    <input type="number" id="precoMinorItem" value="1" min="1" required />
+  </div>
+
+  <div class="campo">
+    <label for="precoMinorMinorItem">Preço Minor Minor (em KK):</label>
+    <input type="number" id="precoMinorMinorItem" value="1" min="1" required />
+  </div>
+
+</form>
+
+
+<div id="resultados" style="display:none;">
+ <h1 style="text-align:center; margin-top: 5px; padding-top: 5px;">RESULTADOS</h1>
+ <div id="resultadoTabela"></div>
+</div>
+
+<script>
+  function gerarCalculos() {
+    const tierAlvo = parseInt(document.getElementById('tierAlvo').value);
+    const tierAtual = parseInt(document.getElementById('tierAtual').value);
+    const precoMainItem = parseFloat(document.getElementById('precoMainItem').value) * 1000000;
+    const precoMinorItem = parseFloat(document.getElementById('precoMinorItem').value) * 1000000;
+    const precoMinorMinorItem = parseFloat(document.getElementById('precoMinorMinorItem').value) * 1000000;
+
+    const custosForja = [
+      8000000, 20000000, 40000000, 65000000, 100000000,
+      250000000, 750000000, 2500000000, 8000000000, 15000000000
+    ];
+
+    const custoTransferencia = [
+      20000000, 40000000, 65000000, 100000000, 250000000,
+      750000000, 2500000000, 8000000000, 15000000000
+    ];
+
+    const custoConvergence = [
+      55000000, 110000000, 170000000, 300000000, 875000000,
+      2350000000, 6950000000, 21250000000, 50000000000, 125000000000
+    ];
+
+    const custoConvergenceTransfer = [
+      65000000, 165000000, 375000000, 800000000, 2000000000,
+      5250000000, 14500000000, 42500000000, 100000000000, 300000000000
+    ];
+
+    const chanceSucesso = 0.65;
+    const n = tierAlvo - tierAtual;
+    const fatorItens = Math.pow(2, n - 1);
+
+    // Fusão Normal - Itens
+    const custoSemFalhasItens = 2 * fatorItens * precoMainItem;
+    const custoComFalhasItens = 3 * fatorItens * precoMainItem;
+
+    // Fusão Normal - Forjas
+    let custoSemFalhasForja = 0;
+    let custoComFalhasForja = 0;
+    for (let tier = tierAtual; tier < tierAlvo; tier++) {
+      const fusoes = Math.pow(2, tierAlvo - tier - 1);
+      custoSemFalhasForja += fusoes * custosForja[tier];
+      custoComFalhasForja += fusoes * (custosForja[tier] / chanceSucesso);
+    }
+    const totalSemFalhas = custoSemFalhasItens + custoSemFalhasForja;
+    const totalComFalhas = custoComFalhasItens + custoComFalhasForja;
+
+    // Normal Transfer
+    const tierOrigemTransfer = tierAlvo + 1;
+    const custoTransfer = custoTransferencia[tierAlvo - 1] || 0;
+
+    let custoCriacaoTransferSemFalhas = 0;
+    let custoCriacaoTransferComFalhas = 0;
+    for (let tier = tierAtual; tier < tierOrigemTransfer; tier++) {
+      const fusoes = Math.pow(2, tierOrigemTransfer - tier - 1);
+      custoCriacaoTransferSemFalhas += fusoes * custosForja[tier];
+      custoCriacaoTransferComFalhas += fusoes * (custosForja[tier] / chanceSucesso);
+    }
+    const totalTransferSemFalhas = custoCriacaoTransferSemFalhas + custoTransfer + precoMainItem + (2 * fatorItens * precoMinorItem);
+    const totalTransferComFalhas = custoCriacaoTransferComFalhas + custoTransfer + precoMainItem + (3 * fatorItens * precoMinorItem);
+
+    // --- Convergence Transfer ---
+    let custoConvergenceTransferSemFalhasForja = 0;
+    let custoConvergenceTransferComFalhasForja = 0;
+    for (let tier = tierAtual; tier < tierAlvo; tier++) {
+      const fusoes = Math.pow(2, tierAlvo - tier - 1);
+      custoConvergenceTransferSemFalhasForja += fusoes * custosForja[tier];
+      custoConvergenceTransferComFalhasForja += fusoes * (custosForja[tier] / chanceSucesso);
+    }
+    const custoConvTransferTier = custoConvergenceTransfer[tierAlvo - 1] || 0;
+    const custoItensConvTransferSemFalhas = precoMainItem + (2 * fatorItens * precoMinorMinorItem);
+    const custoItensConvTransferComFalhas = precoMainItem + (3 * fatorItens * precoMinorMinorItem);
+    const totalConvergenceTransferSemFalhas = custoConvergenceTransferSemFalhasForja + custoConvTransferTier + custoItensConvTransferSemFalhas;
+    const totalConvergenceTransferComFalhas = custoConvergenceTransferComFalhasForja + custoConvTransferTier + custoItensConvTransferComFalhas;
+
+    // --- Convergence Fusion ---
+    let nMinor = Math.pow(2, n) - 1;
+    let itens_MIX = precoMainItem + precoMinorItem * nMinor;
+    let itens_MIX_fails = precoMainItem + precoMinorItem + (precoMinorItem * (nMinor - 1) * 1.5);
+
+    let fusoes_MIX = 0;
+    let fusoes_MIX_fails = 0;
+
+    for (let i = 0; i < n; i++) {
+      const tier = tierAtual + i;
+      fusoes_MIX += custoConvergence[tier] || 0;
+      fusoes_MIX_fails += custoConvergence[tier] || 0;
+    }
+
+    for (let i = 1; i < n; i++) {
+      for (let j = 0; j < i; j++) {
+        const tierFusao = tierAtual + j;
+        const quantidade = Math.pow(2, i - j - 1);
+        const custo = custosForja[tierFusao] || 0;
+
+        fusoes_MIX += quantidade * custo;
+        fusoes_MIX_fails += quantidade * (custo / chanceSucesso);
+      }
+    }
+
+    const itens_FULL = Math.pow(2, n) * precoMainItem;
+    let fusoes_FULL = 0;
+    for (let i = 1; i <= n; i++) {
+      fusoes_FULL += custoConvergence[tierAtual + i - 1] || 0;
+    }
+
+    const total_MIX = itens_MIX + fusoes_MIX;
+    const total_MIX_fails = itens_MIX_fails + fusoes_MIX_fails;
+    const total_FULL = itens_FULL + fusoes_FULL;
+
+    const formatar = (n) => {
+      const valor = n / 1_000_000;
+      const inteiro = Math.floor(valor);
+      const fracao = valor - inteiro;
+      const arredondado = inteiro + (fracao > 0.5 ? 1 : 0);
+      return arredondado.toLocaleString('pt-BR') + ' KK';
+    };
+
+    document.getElementById('resultados').style.display = 'block';
+    document.getElementById('resultados').innerHTML = `
+      <br>
+      <h1 style="text-align:center;">RESULTADOS</h1>
+
+      <h2 style="margin-bottom: 0; padding-bottom: 0;">Normal Fusion</h2>
+      <table>
+        <tr>
+          <th>Tipo</th>
+          <th>Itens</th>
+          <th>Fusões</th>
+          <th>Total</th>
+        </tr>
+        <tr>
+          <td>Sem falhas</td>
+          <td>${formatar(custoSemFalhasItens)}</td>
+          <td>${formatar(custoSemFalhasForja)}</td>
+          <td>${formatar(totalSemFalhas)}</td>
+        </tr>
+        <tr>
+          <td>Com falhas (Prob.)</td>
+          <td>${formatar(custoComFalhasItens)}</td>
+          <td>${formatar(custoComFalhasForja)}</td>
+          <td>${formatar(totalComFalhas)}</td>
+        </tr>
+      </table>
+
+
+      <h2 style="margin-bottom: 0; padding-bottom: 0;">Normal Transfer</h2>
+      <table>
+        <tr>
+          <th>Tipo</th>
+          <th>Itens</th>
+          <th>Fusões</th>
+          <th>Transferência</th>
+          <th>Total</th>
+        </tr>
+        <tr>
+          <td>Sem falhas</td>
+          <td>${formatar(precoMainItem + (2 * fatorItens * precoMinorItem))}</td>
+          <td>${formatar(custoCriacaoTransferSemFalhas)}</td>
+          <td>${formatar(custoTransfer)}</td>
+          <td>${formatar(totalTransferSemFalhas)}</td>
+        </tr>
+        <tr>
+          <td>Com falhas (Prob.)</td>
+          <td>${formatar(precoMainItem + (3 * fatorItens * precoMinorItem))}</td>
+          <td>${formatar(custoCriacaoTransferComFalhas)}</td>
+          <td>${formatar(custoTransfer)}</td>
+          <td>${formatar(totalTransferComFalhas)}</td>
+        </tr>
+      </table>
+
+      <h2 style="margin-bottom: 0; padding-bottom: 0;">Convergence Fusion</h2>
+      <table>
+        <tr>
+          <th>Tipo</th>
+          <th>Itens</th>
+          <th>Fusões</th>
+          <th>Total</th>
+        </tr>
+        <tr>
+          <td>MIX</td>
+          <td>${formatar(itens_MIX)}</td>
+          <td>${formatar(fusoes_MIX)}</td>
+          <td>${formatar(total_MIX)}</td>
+        </tr>
+        <tr>
+          <td>MIX (Fails)</td>
+          <td>${formatar(itens_MIX_fails)}</td>
+          <td>${formatar(fusoes_MIX_fails)}</td>
+          <td>${formatar(total_MIX_fails)}</td>
+        </tr>
+        <tr>
+          <td>Full Conv.</td>
+          <td>${formatar(itens_FULL)}</td>
+          <td>${formatar(fusoes_FULL)}</td>
+          <td>${formatar(total_FULL)}</td>
+        </tr>
+      </table>
+
+
+
+      <h2 style="margin-bottom: 0; padding-bottom: 0;">Convergence Transfer</h2>
+      <table>
+        <tr>
+          <th>Tipo</th>
+          <th>Itens</th>
+          <th>Fusões</th>
+          <th>Transferência</th>
+          <th>Total</th>
+        </tr>
+        <tr>
+          <td>Sem falhas</td>
+          <td>${formatar(custoItensConvTransferSemFalhas)}</td>
+          <td>${formatar(custoConvergenceTransferSemFalhasForja)}</td>
+          <td>${formatar(custoConvTransferTier)}</td>
+          <td>${formatar(totalConvergenceTransferSemFalhas)}</td>
+        </tr>
+        <tr>
+          <td>Com falhas (Prob.)</td>
+          <td>${formatar(custoItensConvTransferComFalhas)}</td>
+          <td>${formatar(custoConvergenceTransferComFalhasForja)}</td>
+          <td>${formatar(custoConvTransferTier)}</td>
+          <td>${formatar(totalConvergenceTransferComFalhas)}</td>
+        </tr>
+      </table>
+      
+    `;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

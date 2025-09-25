@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Comparativo de Habilidades</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .topo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .campo {
+      flex: 1 1 calc(33% - 20px);
+      min-width: 220px;
+    }
+
+    label {
+      display: block;
+      margin-top: 5px;
+      font-weight: bold;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #333;
+      color: white;
+    }
+
+    .mais-vantajoso {
+      background-color: #a4dba4;
+    }
+
+    .mais-vantajoso-plus {
+      background-color: #add8e6;
+    }
+
+    /* destaque: contorno laranja de 2px ao redor da linha */
+    tr.linha-selecionada td {
+      border-top: 2px solid orange;
+      border-bottom: 2px solid orange;
+    }
+    tr.linha-selecionada td:first-child {
+      border-left: 2px solid orange;
+    }
+    tr.linha-selecionada td:last-child {
+      border-right: 2px solid orange;
+    }
+
+
+    .nota {
+      font-size: 0.9em;
+      margin-top: 15px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+<div class="topo">
+  <h2>Comparador de Habilidades</h2>
+  <button onclick="gerarTabela()">Calcular</button>
+</div>
+
+<form id="formDados" onsubmit="return false;">
+  <div class="campo">
+    <label for="pvJogador">Pontos de Vida do Jogador:</label>
+    <input type="number" id="pvJogador" value="2500" min="1" required />
+  </div>
+
+  <div class="campo">
+    <label for="manaJogador">Pontos de Mana do Jogador:</label>
+    <input type="number" id="manaJogador" value="16560" min="1" required />
+  </div>
+
+  <div class="campo">
+    <label for="danoBase">Dano Base:</label>
+    <input type="number" id="danoBase" value="500" min="1" required />
+  </div>
+
+  <div class="campo">
+    <label for="pvMonstro">Pontos de Vida do Monstro:</label>
+    <input type="number" id="pvMonstro" value="5000" min="1" required />
+  </div>
+
+  <div class="campo">
+    <label for="percentLowblow">Percentual Lowblow/Savage (% sobre dano base):</label>
+    <input type="number" id="percentLowblow" value="48" min="0" max="100" step="0.1" required />
+  </div>
+</form>
+
+<p class="nota">
+  A tabela mostra o dano médio por turno considerando:<br>
+  - Elemental: 10% chance de 5% dos PV do monstro  - Elemental+25: 25% a mais que Elemental<br>
+  - Overflux: 10% chance de 2,5% da Mana do jogador (limitado a 8% dos PV do monstro)<br>
+  - Overpower: 10% chance de 5% dos PV do jogador (limitado a 8% dos PV do monstro)<br>
+  - Lowblow/Savage: 10% chance de percentual informado sobre o dano base<br>
+</p>
+
+<table id="tabelaResultados" style="display:none;">
+  <thead>
+    <tr>
+      <th>PV do Monstro</th>
+      <th>Elemental</th>
+      <th>Elemental +5</th>
+      <th>Elemental +10</th>
+      <th>Elemental +15</th>
+      <th>Elemental +20</th>
+      <th>Elemental +25</th>
+      <th>Overflux</th>
+      <th>Overpower</th>
+      <th>Lowblow/Savage</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+  function gerarTabela() {
+    const pvJogador = parseFloat(document.getElementById('pvJogador').value);
+    const manaJogador = parseFloat(document.getElementById('manaJogador').value);
+    const danoBase = parseFloat(document.getElementById('danoBase').value);
+    const pvMonstroExtra = parseFloat(document.getElementById('pvMonstro').value);
+    const percentLowblow = parseFloat(document.getElementById('percentLowblow').value) / 100;
+
+    const tbody = document.querySelector('#tabelaResultados tbody');
+    tbody.innerHTML = '';
+
+    // monta lista com 1000 até 15000
+    let listaPVs = [];
+    for (let pv = 1000; pv <= 15000; pv += 1000) {
+      listaPVs.push(pv);
+    }
+    // adiciona valor extra do input
+    listaPVs.push(pvMonstroExtra);
+
+    // remove duplicados e ordena
+    listaPVs = [...new Set(listaPVs)].sort((a, b) => a - b);
+
+    for (const pvMonstro of listaPVs) {
+      const limitePorChance = 0.08 * pvMonstro * 0.10;
+
+      const elemental = 0.10 * 0.05 * pvMonstro;
+      const elementalPlus5 = elemental * 1.05;
+      const elementalPlus10 = elemental * 1.10;
+      const elementalPlus15 = elemental * 1.15;
+      const elementalPlus20 = elemental * 1.20;
+      const elementalPlus25 = elemental * 1.25;
+
+      let overfluxRaw = 0.10 * 0.025 * manaJogador;
+      const overflux = Math.min(overfluxRaw, limitePorChance);
+
+      let overpowerRaw = 0.10 * 0.05 * pvJogador;
+      const overpower = Math.min(overpowerRaw, limitePorChance);
+
+      const lowblow = 0.10 * percentLowblow * danoBase;
+
+      const maxPrincipal = Math.max(elemental, overflux, overpower, lowblow);
+
+      const celElemental = `<td class="${elemental === maxPrincipal ? 'mais-vantajoso' : ''}">${elemental.toFixed(2)}</td>`;
+      const celElementalPlus5 = `<td class="${(elementalPlus5 > maxPrincipal && elementalPlus5 > elemental) ? 'mais-vantajoso-plus' : ''}">${elementalPlus5.toFixed(2)}</td>`;
+      const celElementalPlus10 = `<td class="${(elementalPlus10 > maxPrincipal && elementalPlus10 > elemental) ? 'mais-vantajoso-plus' : ''}">${elementalPlus10.toFixed(2)}</td>`;
+      const celElementalPlus15 = `<td class="${(elementalPlus15 > maxPrincipal && elementalPlus15 > elemental) ? 'mais-vantajoso-plus' : ''}">${elementalPlus15.toFixed(2)}</td>`;
+      const celElementalPlus20 = `<td class="${(elementalPlus20 > maxPrincipal && elementalPlus20 > elemental) ? 'mais-vantajoso-plus' : ''}">${elementalPlus20.toFixed(2)}</td>`;
+      const celElementalPlus25 = `<td class="${(elementalPlus25 > maxPrincipal && elementalPlus25 > elemental) ? 'mais-vantajoso-plus' : ''}">${elementalPlus25.toFixed(2)}</td>`;
+      const celOverflux = `<td class="${overflux === maxPrincipal ? 'mais-vantajoso' : ''}">${overflux.toFixed(2)}</td>`;
+      const celOverpower = `<td class="${overpower === maxPrincipal ? 'mais-vantajoso' : ''}">${overpower.toFixed(2)}</td>`;
+      const celLowblow = `<td class="${lowblow === maxPrincipal ? 'mais-vantajoso' : ''}">${lowblow.toFixed(2)}</td>`;
+
+       // destaca se pvMonstro for exatamente o valor digitado no input
+      const destaqueClass = (pvMonstro === pvMonstroExtra) ? 'linha-selecionada' : '';
+
+      tbody.innerHTML += `
+        <tr class="${destaqueClass}">
+          <td>${pvMonstro}</td>
+          ${celElemental}
+          ${celElementalPlus5}
+          ${celElementalPlus10}
+          ${celElementalPlus15}
+          ${celElementalPlus20}
+          ${celElementalPlus25}
+          ${celOverflux}
+          ${celOverpower}
+          ${celLowblow}
+        </tr>
+      `;
+    }
+
+    document.getElementById('tabelaResultados').style.display = 'table';
+  }
+</script>
+
+</body>
+</html>

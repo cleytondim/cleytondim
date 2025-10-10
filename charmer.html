@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>ALOCADOR DE CHARMS</title>
+  <style>
+    body {
+      background-color: #f9f9f9;
+      color: #222;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h2{margin-top:0;}
+    .field { margin-bottom: 10px; }
+    label { display: block; font-weight: bold; margin-bottom: 4px; }
+    input, textarea, button { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    textarea { resize: vertical; height: 160px; }
+    .row { display: flex; gap: 10px; }
+    .row .field { flex: 1 1 0; min-width: 0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; background-color: #fff; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+    th { background-color: #eee; }
+    input[type="number"].table-input { width: 80px; text-align: right; padding: 4px; }
+    .charms-container { margin-top: 20px; }
+    .charms-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .charm-btn { flex: 1 0 120px; padding: 8px; border: 1px solid #ccc; border-radius: 8px; background-color: #eaeaea; cursor: pointer; text-align: center; transition: .15s; font-weight: 600; }
+    .charm-btn.active { background-color: #007bff; color: white; border-color: #007bff; }
+    .mode-select { display: flex; gap: 10px; margin-top: 20px; margin-bottom: 15px; }
+    .mode-btn { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 8px; background-color: #eaeaea; cursor: pointer; font-weight: bold; transition: 0.15s; }
+    .mode-btn.active { background-color: #007bff; color: white; border-color: #007bff; }
+    .hidden { display: none; }
+    .remove-btn { background-color: red; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+    .remove-btn:hover { background: #d93636; }
+    #btnCarregar, #btnAdicionarMonstro { background-color: #ffb347; color: #000; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    #btnCarregar:hover, #btnAdicionarMonstro:hover { background-color: #ffa500; }
+    #btnCalcular { background-color: #a8e6a1; color:#063; border:none; padding:10px 18px; border-radius:8px; font-weight:700; cursor:pointer; margin-top:10px; }
+    #btnCalcular:hover { background-color:#8fdb82; }
+    .result-table { margin-top:12px; }
+    .small-note { font-size:12px;color:#555;margin-top:6px; }
+  </style>
+</head>
+<body>
+
+  <h2>ALOCADOR DE CHARMS</h2>
+
+  <div class="row">
+    <div class="field">
+      <label for="vida">HITPOINTS JOGADOR</label>
+      <input type="number" id="vida" value="3900" step="100">
+    </div>
+    <div class="field">
+      <label for="mana">MANAPOINTS</label>
+      <input type="number" id="mana" value="21360" step="100">
+    </div>
+    <div class="field">
+      <label for="danoBase">DANO BASE</label>
+      <input type="number" id="danoBase" value="500" step="1">
+    </div>
+    <div class="field">
+      <label for="chanceCritico">CHANCE CRÍTICO (%)</label>
+      <input type="number" id="chanceCritico" value="12" step="1">
+    </div>
+    <div class="field">
+      <label for="danoCritico">DANO CRÍTICO (%)</label>
+      <input type="number" id="danoCritico" value="70" step="1">
+    </div>
+  </div>
+
+  <!-- Charms -->
+  <div class="charms-container">
+    <h3>Selecione os charms que você possui</h3>
+    <div class="charms-buttons" id="charmsContainer"></div>
+  </div>
+
+  <hr>
+
+  <!-- Mode selector -->
+  <div class="mode-select">
+    <button id="btnAnalyserMode" class="mode-btn active">Analyser</button>
+    <button id="btnManualMode" class="mode-btn">Manualmente</button>
+  </div>
+
+  <!-- Manual form -->
+  <div id="manualContainer" class="hidden">
+    <div class="row">
+      <div class="field">
+        <label for="nomeMonstro">Nome do Monstro</label>
+        <input type="text" id="nomeMonstro" placeholder="Ex: adult goanna">
+      </div>
+      <div class="field">
+        <label for="percentualMonstro">Percentual (%)</label>
+        <input type="number" id="percentualMonstro" placeholder="Ex: 10" step="0.1">
+      </div>
+      <div class="field">
+        <label for="lifeMonstroManual">LIFE MONSTRO</label>
+        <input type="number" id="lifeMonstroManual" placeholder="Ex: 5000" value="5000" step="100">
+      </div>
+      <div class="field" style="flex: 0 0 140px;">
+        <label>&nbsp;</label>
+        <button id="btnAdicionarMonstro">Adicionar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analyser -->
+  <div id="analyserContainer">
+    <div class="field">
+      <label for="analyser">ANALYSER</label>
+      <textarea id="analyser" placeholder="Cole o texto do log aqui..."></textarea>
+    </div>
+    <button id="btnCarregar"><strong>CARREGAR</strong></button>
+  </div>
+
+  <!-- Table of monsters -->
+  <table id="tabelaMonstros">
+    <thead>
+      <tr>
+        <th>Monstro</th>
+        <th>Percentual (%)</th>
+        <th>Life Monstro</th>
+        <th>Death %</th>
+        <th>Energia %</th>
+        <th>Físico %</th>
+        <th>Fogo %</th>
+        <th>Gelo %</th>
+        <th>Holy %</th>
+        <th>Poison %</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <button id="btnCalcular">CALCULAR</button>
+
+  <!-- Results -->
+  <div class="result-table" id="resultArea"></div>
+
+  <script>
+    /* ===== configuração inicial e utilitários ===== */
+    const charms = ["Curse","Divine Wrath","Enflame","Freeze","Low Blow","Overflux","Overpower","Poison","Savage","Wound","Zap"];
+    const charmsContainer = document.getElementById("charmsContainer");
+    const tabelaMonstros = document.getElementById("tabelaMonstros").querySelector("tbody");
+    const analyserContainer = document.getElementById("analyserContainer");
+    const manualContainer = document.getElementById("manualContainer");
+    const btnAnalyserMode = document.getElementById("btnAnalyserMode");
+    const btnManualMode = document.getElementById("btnManualMode");
+    const btnAdicionarMonstro = document.getElementById("btnAdicionarMonstro");
+    const btnCarregar = document.getElementById("btnCarregar");
+    const btnCalcular = document.getElementById("btnCalcular");
+    const resultArea = document.getElementById("resultArea");
+
+    let monstros = []; // objetos: {nome, percentual, life, death, divine, energia, fisico, fogo, gelo, poison}
+
+    // renderizar botões de charms
+    charms.forEach(name=>{
+      const b = document.createElement("div");
+      b.className = "charm-btn";
+      b.textContent = name;
+      b.dataset.name = name;
+      b.addEventListener("click", ()=> b.classList.toggle("active"));
+      charmsContainer.appendChild(b);
+    });
+
+    // util
+    function getSelectedCharms(){
+      return Array.from(document.querySelectorAll(".charm-btn.active")).map(n=>n.dataset.name);
+    }
+
+    function normalizarPercentuais(){
+      const total = monstros.reduce((s,m)=>s + (+m.percentual || 0),0);
+      if(total > 100 && total>0){
+        monstros = monstros.map(m=> ({...m, percentual: parseFloat(((m.percentual/total)*100).toFixed(6))}));
+      }
+    }
+
+    function atualizarTabela(){
+      normalizarPercentuais();
+      monstros.sort((a,b)=> b.percentual - a.percentual);
+      tabelaMonstros.innerHTML = "";
+
+      monstros.forEach((m,i)=>{
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td style="display:flex;align-items:center;gap:8px;justify-content:center;">
+            <strong style="flex:1;text-align:left">${m.nome}</strong>
+            <button class="remove-btn" data-index="${i}" title="Remover">✖</button>
+          </td>
+          <td><input type="number" class="table-input p-input" value="${(m.percentual||0).toFixed(2)}" step="0.01"></td>
+          <td><input type="number" class="table-input life-input" value="${(m.life||5000)}" step="100"></td>
+          <td><input type="number" class="table-input" value="${m.death}" step="5"></td>
+          <td><input type="number" class="table-input" value="${m.energia}" step="5"></td>
+          <td><input type="number" class="table-input" value="${m.fisico}" step="5"></td>
+          <td><input type="number" class="table-input" value="${m.fogo}" step="5"></td>
+          <td><input type="number" class="table-input" value="${m.gelo}" step="5"></td>
+          <td><input type="number" class="table-input" value="${m.divine}" step="5"></td>
+          <td><input type="number" class="table-input" value="${m.poison}" step="5"></td>
+        `;
+        tabelaMonstros.appendChild(tr);
+      });
+
+      // eventos: remover (duas maneiras)
+      tabelaMonstros.querySelectorAll(".remove-btn").forEach(btn=>{
+        btn.onclick = (e)=>{
+          const idx = btn.dataset.index ?? btn.dataset.index2;
+          if(idx!==undefined) {
+            monstros.splice(Number(idx),1);
+            atualizarTabela();
+          }
+        };
+      });
+
+      // eventos: quando o usuário editar inputs na tabela, atualizar objeto
+      tabelaMonstros.querySelectorAll("input").forEach((input, idx)=>{
+        input.addEventListener("input", ()=>{
+          // descobrir qual linha e qual coluna
+          const row = input.closest("tr");
+          const rowIndex = Array.from(tabelaMonstros.children).indexOf(row);
+          if(rowIndex < 0) return;
+          const m = monstros[rowIndex];
+          if(!m) return;
+          // map inputs by class
+          if(input.classList.contains("p-input")) m.percentual = parseFloat(input.value) || 0;
+          else if(input.classList.contains("life-input")) m.life = parseFloat(input.value) || 0;
+          else {
+            // map column by position
+            const inputs = Array.from(row.querySelectorAll("input.table-input"));
+            // inputs order: percentual (handled), life, death, divine, energia, fisico, fogo, gelo, poison
+            // but here this else only triggers for the element that's not p-input and not life-input,
+            // so map by index among table-inputs
+            const all = row.querySelectorAll("input.table-input, input.p-input, input.life-input");
+            // safer mapping by cell index:
+            const cells = Array.from(row.children);
+            const cellIndex = cells.indexOf(input.closest("td"));
+            // columns: 0 name, 1 percentual, 2 life, 3 death, 4 divine, 5 energia, 6 fisico, 7 fogo, 8 gelo, 9 poison, 10 action
+            switch(cellIndex){
+              case 3: m.death = parseFloat(input.value)||0; break;
+              case 5: m.energia = parseFloat(input.value)||0; break;
+              case 6: m.fisico = parseFloat(input.value)||0; break;
+              case 7: m.fogo = parseFloat(input.value)||0; break;
+              case 8: m.gelo = parseFloat(input.value)||0; break;
+              case 4: m.divine = parseFloat(input.value)||0; break;
+              case 9: m.poison = parseFloat(input.value)||0; break;
+              default: break;
+            }
+          }
+        });
+      });
+    }
+
+    function limparMonstros(){ monstros = []; atualizarTabela(); }
+
+    /* modo */
+    function ativarModo(novoModo){
+      limparMonstros();
+      if(novoModo === "analyser"){
+        analyserContainer.classList.remove("hidden");
+        manualContainer.classList.add("hidden");
+        btnAnalyserMode.classList.add("active");
+        btnManualMode.classList.remove("active");
+      } else {
+        analyserContainer.classList.add("hidden");
+        manualContainer.classList.remove("hidden");
+        btnManualMode.classList.add("active");
+        btnAnalyserMode.classList.remove("active");
+      }
+    }
+    btnAnalyserMode.onclick = ()=> ativarModo("analyser");
+    btnManualMode.onclick = ()=> ativarModo("manual");
+
+    // adicionar manual
+    btnAdicionarMonstro.onclick = ()=>{
+      const nome = document.getElementById("nomeMonstro").value.trim();
+      const percentual = parseFloat(document.getElementById("percentualMonstro").value);
+      const lifeManual = parseFloat(document.getElementById("lifeMonstroManual").value) || 5000;
+      if(!nome || isNaN(percentual) || percentual <= 0){ alert("Nome e percentual válidos são necessários."); return; }
+      monstros.push({
+        nome,
+        percentual,
+        life: lifeManual,
+        death:100, divine:100, energia:100, fisico:100, fogo:100, gelo:100, poison:100
+      });
+      document.getElementById("nomeMonstro").value = "";
+      document.getElementById("percentualMonstro").value = "";
+      document.getElementById("lifeMonstroManual").value = "5000";
+      atualizarTabela();
+    };
+
+    // carregar analyser (gera monstros com life padrão 5000)
+    btnCarregar.onclick = ()=>{
+      const texto = document.getElementById("analyser").value;
+      const bloco = texto.match(/Killed Monsters:\s*([\s\S]*?)(Looted Items:|$)/i);
+      if(!bloco){ alert("Nenhuma lista de 'Killed Monsters' encontrada."); return; }
+      const linhas = bloco[1].split("\n").map(l=>l.trim()).filter(Boolean);
+      const lista = [];
+      linhas.forEach(l=>{
+        const m = l.match(/^(\d+)x\s+(.*)$/);
+        if(m) lista.push({nome: m[2].trim(), qtd: parseInt(m[1])});
+      });
+      if(lista.length===0){ alert("Nenhum monstro reconhecido no analisador."); return; }
+      const total = lista.reduce((s,x)=>s + x.qtd, 0);
+      monstros = lista.map(x=>({
+        nome: x.nome,
+        percentual: (x.qtd/total)*100,
+        life: 5000,
+        death:100, divine:100, energia:100, fisico:100, fogo:100, gelo:100, poison:100
+      }));
+      atualizarTabela();
+    };
+
+    /* ===== lógica de cálculo de dano esperado ===== */
+
+    function calcExpectedDamageForCharm(monster, charmName, player){
+      // monster: {name, life, death, divine, energia, fisico, fogo, gelo, poison}
+      // player: {vida, mana, danoBase, chanceCritico, danoCritico}
+      const life = Number(monster.life) || 0;
+      const p = player;
+      // helper for elemental charms: 5% life * sensitivity/100
+      function elementalDamage(sensitivity){
+        const base = 0.05 * life;
+        return base * (sensitivity/100);
+      }
+
+      switch(charmName){
+        case "Curse": {
+          const chance = 0.10;
+          const dmg = elementalDamage(monster.death);
+          return chance * dmg;
+        }
+        case "Divine Wrath": {
+          const chance = 0.10;
+          const dmg = elementalDamage(monster.divine);
+          return chance * dmg;
+        }
+        case "Enflame": {
+          const chance = 0.10;
+          const dmg = elementalDamage(monster.fogo);
+          return chance * dmg;
+        }
+        case "Freeze": {
+          const chance = 0.10;
+          const dmg = elementalDamage(monster.gelo);
+          return chance * dmg;
+        }
+        case "Poison": {
+          const chance = 0.10;
+          const dmg = elementalDamage(monster.poison);
+          return chance * dmg;
+        }
+        case "Wound": {
+          const chance = 0.10;
+          const dmg = elementalDamage(monster.fisico);
+          return chance * dmg;
+        }
+        case "Zap": {
+          const chance = 0.10;
+          const dmg = elementalDamage(monster.energia);
+          return chance * dmg;
+        }
+        case "Low Blow": {
+          const chance = 0.08;
+          // interpreta: dano = danoBase * (danoCritico / 100)
+          const dmg = p.danoBase * (p.danoCritico/100);
+          return chance * dmg;
+        }
+        case "Savage": {
+          // chance = chanceCritico (%)
+          const chance = Math.max(0, Math.min(100, Number(p.chanceCritico || 0))) / 100;
+          const dmg = 0.40 * p.danoBase; // 40% do dano base do jogador
+          return chance * dmg;
+        }
+        case "Overflux": {
+          const chance = 0.10;
+          const candidate = 0.025 * p.mana; // 2.5% mana
+          const limit = 0.08 * life; // 8% life
+          const dmg = Math.min(candidate, limit);
+          return chance * dmg;
+        }
+        case "Overpower": {
+          const chance = 0.10;
+          const candidate = 0.05 * p.vida; // 5% vida do jogador
+          const limit = 0.08 * life;
+          const dmg = Math.min(candidate, limit);
+          return chance * dmg;
+        }
+        default:
+          return 0;
+      }
+    }
+
+    // função principal: para cada monstro, entre os charms selecionados, escolhe charm que maximiza o dano ponderado
+    btnCalcular.onclick = () => {
+      const selected = getSelectedCharms();
+      if (selected.length === 0) { alert("Selecione ao menos 1 charm."); return; }
+      if (monstros.length === 0) { alert("Adicione ou carregue monstros primeiro."); return; }
+
+      const player = {
+        vida: Number(document.getElementById("vida").value) || 0,
+        mana: Number(document.getElementById("mana").value) || 0,
+        danoBase: Number(document.getElementById("danoBase").value) || 0,
+        chanceCritico: Number(document.getElementById("chanceCritico").value) || 0,
+        danoCritico: Number(document.getElementById("danoCritico").value) || 0
+      };
+
+      const rows = Array.from(tabelaMonstros.children);
+      rows.forEach((row, idx) => {
+        const cells = row.querySelectorAll("input");
+        if (!cells || cells.length < 9) return;
+        monstros[idx].percentual = parseFloat(cells[0].value) || 0;
+        monstros[idx].life = parseFloat(cells[1].value) || 0;
+        monstros[idx].death = parseFloat(cells[2].value) || 100;
+        monstros[idx].energia = parseFloat(cells[3].value) || 100;
+        monstros[idx].fisico = parseFloat(cells[4].value) || 100;
+        monstros[idx].fogo = parseFloat(cells[5].value) || 100;
+        monstros[idx].gelo = parseFloat(cells[6].value) || 100;
+        monstros[idx].divine = parseFloat(cells[7].value) || 100;
+        monstros[idx].poison = parseFloat(cells[8].value) || 100;
+      });
+
+      normalizarPercentuais();
+
+      // Função para gerar todas as permutações possíveis dos charms
+      function gerarPermutacoes(arr, tamanho) {
+        if (tamanho === 1) return arr.map(el => [el]);
+        const perms = [];
+        arr.forEach((el, i) => {
+          const resto = [...arr.slice(0, i), ...arr.slice(i + 1)];
+          gerarPermutacoes(resto, tamanho - 1).forEach(p => perms.push([el, ...p]));
+        });
+        return perms;
+      }
+
+      const perms = gerarPermutacoes(selected, monstros.length);
+
+      let melhorCombinacao = null;
+      let melhorDanoTotal = -Infinity;
+
+      perms.forEach(combinacao => {
+        let danoTotal = 0;
+        const resultados = [];
+        combinacao.forEach((charm, i) => {
+          const danoReal = calcExpectedDamageForCharm(monstros[i], charm, player) * (monstros[i].percentual || 0);
+          const ponderado = danoReal * (monstros[i].percentual / 100);
+          danoTotal += ponderado;
+          resultados.push({monstro: monstros[i].nome, charm, danoReal, ponderado});
+        });
+        if (danoTotal > melhorDanoTotal) {
+          melhorDanoTotal = danoTotal;
+          melhorCombinacao = resultados;
+        }
+      });
+
+      let html = `<table class="result"><thead><tr><th>Monstro</th><th>Charm Escolhido</th><th>Dano Potencial</th></tr></thead><tbody>`;
+      let somaDanoReal = 0;
+      melhorCombinacao.forEach(r => {
+        html += `<tr>
+          <td style="text-align:left;padding-left:8px">${r.monstro}</td>
+          <td>${r.charm}</td>
+          <td>${r.danoReal.toFixed(0)}</td>
+        </tr>`;
+        somaDanoReal += r.danoReal;
+      });
+      html += `</tbody></table>`;
+      html += `<div class="small-note"><strong>Total de dano potencial:</strong> ${somaDanoReal.toFixed(0)}</div>`;
+      resultArea.innerHTML = html;
+    };
+
+
+
+    // inicializar (nenhum monstro)
+    atualizarTabela();
+  </script>
+</body>
+</html>

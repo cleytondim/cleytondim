@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>Comparador de Runas</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+:root{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
+body{background:#f6f7fb;color:#111;padding:20px;min-height:100vh}
+.card{max-width:1100px;margin:0 auto;background:#fff;padding:18px;border-radius:12px;box-shadow:0 6px 30px rgba(20,20,40,.06)}
+h1{font-size:18px;margin:0 0 12px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.field{flex:1 1 140px;min-width:140px;margin-bottom:10px}
+label{font-weight:700;font-size:13px;display:block;margin-bottom:6px}
+input, textarea, button, select{width:100%;padding:8px;border-radius:8px;border:1px solid #d0d7e2;box-sizing:border-box;font-size:14px}
+textarea{min-height:120px;font-family:monospace}
+.mode-select{display:flex;gap:8px;margin:12px 0}
+.mode-btn{flex:1;padding:10px;border-radius:8px;border:1px solid #d0d7e2;background:#f0f3f8;cursor:pointer;font-weight:700}
+.mode-btn.active{background:#2563eb;color:#fff;border-color:#2563eb}
+.actions{display:flex;gap:8px;margin-top:10px}
+#btnCarregar,#btnAdicionarMonstro{background:#ffb347;border:0;color:#000;font-weight:800;cursor:pointer}
+#btnCarregar:hover,#btnAdicionarMonstro:hover{background:#ffa500}
+#btnCalcular{background:#9fe6a8;border:0;color:#063;font-weight:800;cursor:pointer;padding:10px 14px;border-radius:8px}
+#btnCalcular:hover{background:#78d488}
+table{width:100%;border-collapse:collapse;margin-top:14px}
+th,td{border:1px solid #e3e7ee;padding:6px;text-align:center;font-size:13px}
+th{background:#f3f6fb}
+.remove-btn{background:#ff5b5b;border:0;color:#fff;border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.remove-btn:hover{background:#e04444}
+.small{font-size:13px;color:#445}
+.result{margin-top:12px}
+.muted{color:#666;font-size:13px}
+@media (max-width:900px){
+  .row{flex-direction:column}
+  .field{min-width:unset}
+}
+#btnAdicionarMonstro {
+  height: 100%;
+}
+</style>
+</head>
+<body>
+<main class="card">
+  <h1>COMPARADOR DE RUNAS — Avalanche / Great Fireball / Thunderstorm / Stone Shower</h1>
+
+  <div class="row">
+    <div class="field">
+      <label for="nivel">LEVEL</label>
+      <input id="nivel" type="number" value="650" step="1" />
+    </div>
+    <div class="field">
+      <label for="ml">MAGIC LEVEL</label>
+      <input id="ml" type="number" value="150" step="1" />
+    </div>
+    <div class="field" style="display:flex;flex-direction:column;justify-content:flex-end;">
+      <label>&nbsp;</label>
+      <div style="display:flex;gap:8px;">
+        <label><input type="checkbox" id="runicMs" checked> RUNIC MS</label>
+        <label><input type="checkbox" id="runicEd"> RUNIC ED</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="mode-select" role="tablist" aria-label="Modo de entrada">
+    <button id="btnAnalyser" class="mode-btn active">Analyser</button>
+    <button id="btnManual" class="mode-btn">Manualmente</button>
+  </div>
+
+  <!-- Analyser -->
+  <div id="analyserBlock">
+    <label for="analyser">ANALYSER (cole o log — será lido o bloco "Killed Monsters:")</label>
+    <textarea id="analyser" placeholder="Cole aqui o log..."></textarea>
+    <div class="actions" style="margin-top:8px">
+      <button id="btnCarregar"><strong>CARREGAR</strong></button>
+    </div>
+  </div>
+
+  <!-- Manual -->
+  <div id="manualBlock" style="display:none;margin-top:12px">
+    <div class="row">
+      <div class="field">
+        <label for="nomeMonstro">Nome do Monstro</label>
+        <input id="nomeMonstro" type="text" placeholder="ex: adult goanna">
+      </div>
+      <div class="field">
+        <label for="lifeMonstro">Life do Monstro</label>
+        <input id="lifeMonstro" type="number" value="5000" step="10">
+      </div>
+      <div class="field">
+        <label for="geloMonstro">Gelo (%)</label>
+        <input id="geloMonstro" type="number" value="100" step="5">
+      </div>
+      <div class="field">
+        <label for="fogoMonstro">Fogo (%)</label>
+        <input id="fogoMonstro" type="number" value="100" step="5">
+      </div>
+      <div class="field">
+        <label for="poisonMonstro">Poison (%)</label>
+        <input id="poisonMonstro" type="number" value="100" step="5">
+      </div>
+      <div class="field">
+        <label for="energiaMonstro">Energia (%)</label>
+        <input id="energiaMonstro" type="number" value="100" step="5">
+      </div>
+      <div style="flex:0 0 140px;display:flex;align-items:center">
+        <button id="btnAdicionarMonstro">Adicionar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabela -->
+  <table id="tabelaMonstros" aria-live="polite">
+    <thead>
+      <tr>
+        <th>Monstro</th>
+        <th>Life</th>
+        <th>Gelo %</th>
+        <th>Fogo %</th>
+        <th>Poison %</th>
+        <th>Energia %</th>
+        <th>Remover</th>
+        <th>Incluir</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
+    <button id="btnCalcular">CALCULAR</button>
+    <div class="muted" style="margin-left:8px">Resultado ordenado: runa mais eficiente → menos eficiente</div>
+  </div>
+
+  <div id="resultArea" class="result"></div>
+  <button id="registrarBoxBtn" style="display:none;margin-top:10px;padding:8px 12px;background:#9fe6a8;border:none;color:#063;border-radius:6px;cursor:pointer;font-weight:bold">
+    REGISTRAR BOX
+  </button>
+  
+  <div id="boxesArea" style="margin-top:20px;"></div>
+  
+</main>
+
+<script>
+const tabelaBody = document.querySelector('#tabelaMonstros tbody');
+const analyserBlock = document.getElementById('analyserBlock');
+const manualBlock = document.getElementById('manualBlock');
+const btnAnalyser = document.getElementById('btnAnalyser');
+const btnManual = document.getElementById('btnManual');
+const btnCarregar = document.getElementById('btnCarregar');
+const btnAdicionarMonstro = document.getElementById('btnAdicionarMonstro');
+const btnCalcular = document.getElementById('btnCalcular');
+const resultArea = document.getElementById('resultArea');
+const runicMs = document.getElementById('runicMs');
+const runicEd = document.getElementById('runicEd');
+
+
+let monstros = [];
+
+function ativarModo(modo){
+  monstros = [];
+  atualizarTabela();
+  analyserBlock.style.display = modo === 'analyser' ? '' : 'none';
+  manualBlock.style.display = modo === 'manual' ? '' : 'none';
+  btnAnalyser.classList.toggle('active', modo === 'analyser');
+  btnManual.classList.toggle('active', modo === 'manual');
+  resultArea.innerHTML = '';
+}
+btnAnalyser.addEventListener('click', ()=>ativarModo('analyser'));
+btnManual.addEventListener('click', ()=>ativarModo('manual'));
+
+btnAdicionarMonstro.addEventListener('click', ()=>{
+  const nome = document.getElementById('nomeMonstro').value.trim();
+  const life = parseFloat(document.getElementById('lifeMonstro').value) || 5000;
+  const gelo = parseFloat(document.getElementById('geloMonstro').value) || 100;
+  const fogo = parseFloat(document.getElementById('fogoMonstro').value) || 100;
+  const poison = parseFloat(document.getElementById('poisonMonstro').value) || 100;
+  const energia = parseFloat(document.getElementById('energiaMonstro').value) || 100;
+  if(!nome){
+    alert('Nome válido é necessário.');
+    return;
+  }
+  monstros.push({ nome, life, gelo, fogo, poison, energia });
+  document.getElementById('nomeMonstro').value = '';
+  atualizarTabela();
+});
+
+function atualizarTabela(){
+  tabelaBody.innerHTML = '';
+  //monstros.sort((a, b) => a.nome.localeCompare(b.nome));
+  monstros.forEach((m,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="text-align:left;padding-left:8px">${escapeHtml(m.nome)}</td>
+      <td><input class="small-input life-input" type="number" value="${m.life}" step="10"></td>
+      <td><input class="small-input" type="number" value="${m.gelo}" step="5"></td>
+      <td><input class="small-input" type="number" value="${m.fogo}" step="5"></td>
+      <td><input class="small-input" type="number" value="${m.poison}" step="5"></td>
+      <td><input class="small-input" type="number" value="${m.energia}" step="5"></td>
+      <td><button class="remove-btn" data-i="${i}">✖</button></td>
+      <td><input type="checkbox" class="include-checkbox" data-i="${i}" checked></td>
+    `;
+    tabelaBody.appendChild(tr);
+  });
+
+  tabelaBody.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const row = inp.closest('tr');
+      const r = Array.from(tabelaBody.children).indexOf(row);
+      const cells = row.querySelectorAll('input');
+      monstros[r].life = parseFloat(cells[0].value) || 0;
+      monstros[r].gelo = parseFloat(cells[1].value) || 100;
+      monstros[r].fogo = parseFloat(cells[2].value) || 100;
+      monstros[r].poison = parseFloat(cells[3].value) || 100;
+      monstros[r].energia = parseFloat(cells[4].value) || 100;
+    });
+  });
+
+  tabelaBody.querySelectorAll('.remove-btn').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const i = Number(b.dataset.i);
+      monstros.splice(i,1);
+      atualizarTabela();
+    });
+  });
+}
+
+btnCarregar.addEventListener('click', ()=>{
+  const texto = document.getElementById('analyser').value;
+  if(!texto.trim()){ alert('Cole o log no campo Analyser.'); return; }
+  const bloco = texto.match(/Killed Monsters:\s*([\s\S]*?)(Looted Items:|$)/i);
+  if(!bloco){ alert("Bloco 'Killed Monsters:' não encontrado."); return; }
+  const linhas = bloco[1].split('\n').map(l=>l.trim()).filter(Boolean);
+  const lista = [];
+  linhas.forEach(l=>{
+    const m = l.match(/^(\d+)x\s+(.*)$/);
+    if(m) lista.push({nome: m[2].trim(), life: 5000, gelo:100, fogo:100, poison:100, energia:100});
+  });
+  monstros = lista;
+  atualizarTabela();
+});
+
+const RUNES = {
+  Avalanche: { el: 'gelo', xMin:1.2, yMin:7, xMax:2.8, yMax:17 },
+  GreatFireball: { el: 'fogo', xMin:1.2, yMin:7, xMax:2.8, yMax:17 },
+  Thunderstorm: { el: 'energia', xMin:1.0, yMin:6, xMax:2.6, yMax:16 },
+  StoneShower: { el: 'poison', xMin:1.0, yMin:6, xMax:2.6, yMax:16 }
+};
+function avgRuneDamage(runeName,lvl,ml){
+  const p = RUNES[runeName];
+  const min = lvl*0.2 + ml*p.xMin + p.yMin;
+  const max = lvl*0.2 + ml*p.xMax + p.yMax;
+  return (min+max)/2;
+}
+
+
+// Garantir exclusividade: se um for marcado, desmarca o outro
+runicMs.addEventListener('change', ()=>{
+  if(runicMs.checked) runicEd.checked = false;
+});
+runicEd.addEventListener('change', ()=>{
+  if(runicEd.checked) runicMs.checked = false;
+});
+
+
+btnCalcular.addEventListener('click', ()=>{
+  if(monstros.length === 0){ alert('Adicione ou carregue monstros primeiro.'); return; }
+
+  const monstrosSelecionados = monstros.filter((m, i) => {
+    const checkbox = tabelaBody.querySelector(`.include-checkbox[data-i="${i}"]`);
+    return checkbox && checkbox.checked;
+  });
+
+  if (monstrosSelecionados.length === 0) {
+    alert('Selecione pelo menos um monstro para calcular.');
+    return;
+  }
+
+  const lvl = Number(document.getElementById('nivel').value) || 0;
+  const ml = Number(document.getElementById('ml').value) || 0;
+
+  // Aplicar acréscimos de Runic
+  const applyRunic = (runeName) => {
+    let mlMod = ml;
+    if(runicMs.checked){
+      if(runeName === 'GreatFireball' || runeName === 'Thunderstorm'){
+        mlMod = Math.floor(ml * 1.05); // +5%
+      } else if(runeName === 'Avalanche' || runeName === 'StoneShower'){
+        mlMod = Math.floor(ml * 1.025); // +2.5%
+      }
+    } else if(runicEd.checked){
+      if(runeName === 'Avalanche' || runeName === 'StoneShower'){
+        mlMod = Math.floor(ml * 1.05); // +5%
+      } else if(runeName === 'GreatFireball' || runeName === 'Thunderstorm'){
+        mlMod = Math.floor(ml * 1.025); // +2.5%
+      }
+    }
+    return mlMod;
+  };
+
+  const results = [];
+  for(const runeName of Object.keys(RUNES)){
+    const mlCalculado = applyRunic(runeName);
+    const dmgAvg = avgRuneDamage(runeName, lvl, mlCalculado);
+    //const dmgAvg = avgRuneDamage(runeName,lvl,ml);
+    const sensKey = RUNES[runeName].el;
+
+    let maxRunes = 0;
+    monstrosSelecionados.forEach(m=>{
+      const sens = Number(m[sensKey]) || 100;
+      const dmgEff = dmgAvg * (sens/100);
+      if(dmgEff>0){
+        const runes = Math.ceil(m.life/dmgEff);
+        if(runes>maxRunes) maxRunes = runes;
+      } else { maxRunes = Infinity; }
+    });
+
+    results.push({ rune: runeName, dmgAvg, runesNecessarias: maxRunes });
+  }
+
+  results.sort((a,b)=>a.runesNecessarias-b.runesNecessarias);
+
+  let html = `<div class="small">Level: ${lvl} — Magic Level: ${ml}</div>`;
+  html += `<table><thead><tr><th>Runa</th><th>Elemento</th><th>Dano Médio</th><th>Runas necessárias</th></tr></thead><tbody>`;
+  results.forEach(r=>{
+    html += `<tr>
+      <td>${r.rune}</td>
+      <td>${RUNES[r.rune].el}</td>
+      <td>${formatNum(r.dmgAvg)}</td>
+      <td>${isFinite(r.runesNecessarias)?r.runesNecessarias:'∞'}</td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  resultArea.innerHTML = html;
+  document.getElementById('registrarBoxBtn').style.display = "inline-block";
+  document.getElementById('registrarBoxBtn').onclick = () => registrarBox(results);
+});
+
+function formatNum(n){
+  if(!isFinite(n)) return '∞';
+  if(Math.abs(n)>=1000) return Number(n).toLocaleString('pt-BR',{maximumFractionDigits:0});
+  return Number(n).toLocaleString('pt-BR',{maximumFractionDigits:2});
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+let boxes = [];
+
+function registrarBox(results) {
+  if (!results || results.length === 0) return;
+  
+  const melhorRuna = results.reduce((a,b) => a.runesNecessarias < b.runesNecessarias ? a : b);
+  const boxName = `Box${boxes.length + 1}`;
+  
+  boxes.push({
+    nome: boxName,
+    runa: melhorRuna.rune,
+    runasNecessarias: melhorRuna.runesNecessarias
+  });
+
+  atualizarTabelaBoxes();
+}
+
+function atualizarTabelaBoxes() {
+  let html = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <h2 style="margin:0">Boxes Atuais</h2>
+      <button id="resetBoxesBtn" style="
+        background:#ff7f7f;
+        border:none;
+        color:#fff;
+        padding:4px 10px;
+        border-radius:6px;
+        cursor:pointer;
+        font-weight:bold;
+        max-width: 100px;
+      ">RESET</button>
+    </div>
+  `;
+
+  html += `<table><thead><tr><th>Box</th><th>Runa Mais Apropriada</th></tr></thead><tbody>`;
+  boxes.forEach(b => {
+    html += `<tr>
+      <td>${b.nome}</td>
+      <td>${b.runa}</td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+
+  const container = document.getElementById('boxesArea');
+  container.innerHTML = html;
+
+  // Adicionar evento ao botão RESET
+  const resetBtn = document.getElementById('resetBoxesBtn');
+  if(resetBtn){
+    resetBtn.addEventListener('click', ()=>{
+      boxes = [];
+      atualizarTabelaBoxes(); // atualiza a tabela vazia
+    });
+  }
+}
+
+
+
+ativarModo('analyser');
+</script>
+</body>
+</html>

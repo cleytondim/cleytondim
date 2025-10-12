@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ferramentas Tibia - Menu</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      gap: 20px;
+    }
+
+    .menu-container {
+      display: grid;
+      grid-template-columns: repeat(2, 200px);
+      grid-gap: 20px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 150px;
+      font-size: 28px;
+      font-weight: bold;
+      color: #000;
+      text-decoration: none;
+      border-radius: 16px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .menu-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+    }
+
+    .blue   { background-color: #4da6ff; }
+    .red    { background-color: #ff6666; }
+    .green  { background-color: #66cc66; }
+    .orange { background-color: #ffb84d; }
+
+    h1 {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Ferramentas Tibia - Menu</h1>
+
+  <div class="menu-container">
+    <a href="charmer.html" class="menu-item blue">CHARMS</a>
+    <a href="runer.html" class="menu-item red">RUNES</a>
+    <a href="forge.html" class="menu-item green">FORJA</a>
+    <a href="analyser.html" class="menu-item orange">ANALYSERS</a>
+  </div>
+
+</body>
+</html>

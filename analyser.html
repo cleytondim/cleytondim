@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blocos com TextArea</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 40px;
+    }
+
+    .bloco {
+      width: 300px;
+      height: 300px;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      padding: 15px;
+      color: black;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    label {
+      font-weight: bold;
+      font-size: 20px;
+      margin-bottom: 10px;
+      text-align: center;
+      display: block;
+    }
+
+    textarea {
+      flex: 1;
+      width: 100%;
+      resize: none;
+      border: none;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 14px;
+      background-color: rgba(255, 255, 255, 0.8);
+      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .azul { background-color: #4ea8de; }
+    .vermelho { background-color: #ff6b6b; }
+    .verde { background-color: #51cf66; }
+    .laranja { background-color: #ffa94d; }
+  </style>
+</head>
+<body>
+
+  <div class="bloco verde">
+    <label>Goannas</label>
+    <textarea readonly>
+Healing/h: 738,736
+Killed Monsters:
+  840x adult goanna
+  719x feral sphinx
+  149x lamassu
+  554x manticore
+  243x ogre rowdy
+  141x ogre ruffian
+  127x ogre sage
+  180x sphinx
+  1094x young goanna
+Looted Items:
+  3x a small enchanted emerald
+    </textarea>
+  </div>
+
+  <div class="bloco vermelho">
+    <label>Inferniarch</label>
+    <textarea readonly>
+Healing/h: 425,916
+Killed Monsters:
+  1191x broodrider inferniarch
+  1032x gorger inferniarch
+  1052x sineater inferniarch
+Looted Items:
+  388x a platinum coin
+    </textarea>
+  </div>
+
+  <div class="bloco azul">
+    <label>Livraria Gelo</label>
+    <textarea readonly>A definir</textarea>
+  </div>
+
+  <div class="bloco laranja">
+    <label>Dragaozinhos</label>
+    <textarea readonly>A definir</textarea>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>CÁLCULOS DE DODGE</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  :root{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
+  body{background:#f6f7fb;color:#111;padding:20px;min-height:100vh}
+  .card{max-width:1100px;margin:0 auto;background:#fff;padding:18px;border-radius:12px;box-shadow:0 6px 30px rgba(20,20,40,.06)}
+  h1{font-size:18px;margin:0 0 12px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .field{flex:1 1 80px;min-width:80px;margin-bottom:10px}
+  label{font-weight:700;font-size:13px;display:block;margin-bottom:6px}
+  input, textarea, button, select{width:100%;padding:8px;border-radius:8px;border:1px solid #d0d7e2;box-sizing:border-box;font-size:14px}
+  textarea{min-height:120px;font-family:monospace}
+  .mode-select{display:flex;gap:8px;margin:12px 0}
+  .mode-btn{flex:1;padding:10px;border-radius:8px;border:1px solid #d0d7e2;background:#f0f3f8;cursor:pointer;font-weight:700}
+  .mode-btn.active{background:#2563eb;color:#fff;border-color:#2563eb}
+  .actions{display:flex;gap:8px;margin-top:10px}
+  #btnCarregar,#btnAdicionarMonstro{background:#ffb347;border:0;color:#000;font-weight:800;cursor:pointer}
+  #btnCarregar:hover,#btnAdicionarMonstro:hover{background:#ffa500}
+  #btnCalcular{background:#9fe6a8;border:0;color:#063;font-weight:800;cursor:pointer;padding:10px 14px;border-radius:8px}
+  #btnCalcular:hover{background:#78d488}
+  table{width:100%;border-collapse:collapse;margin-top:14px}
+  th,td{border:1px solid #e3e7ee;padding:6px;text-align:center;font-size:13px}
+  th{background:#f3f6fb}
+  .remove-btn{background:#ff5b5b;border:0;color:#fff;border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+  .remove-btn:hover{background:#e04444}
+  .small{font-size:13px;color:#445}
+  .result{margin-top:12px}
+  .muted{color:#666;font-size:13px}
+  .gold{background:linear-gradient(90deg, rgba(255,245,200,0.8), rgba(255,238,170,0.7));}
+  .att-list{list-style:none;padding:0;margin:0; font-size:12px; text-align:left;}
+  .att-list li{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px dashed #eee}
+  .small-btn{padding:4px 8px;border-radius:6px;border:1px solid #ccc;background:#fafafa;cursor:pointer}
+  .modal { position:fixed; left:0; top:0; right:0; bottom:0; display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35); }
+  .modal-card { background:#fff;padding:16px;border-radius:10px;max-width:420px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,0.2) }
+  @media (max-width:900px){ .row{flex-direction:column} .field{min-width:unset} }
+</style>
+</head>
+<body>
+  <main class="card">
+    <h1>CÁLCULOS DE DODGE</h1>
+
+    <div style="margin-bottom:8px" class="small muted">
+      Proteções (valores em %)
+    </div>
+
+    <div class="row" style="align-items:end">
+      <div class="field"><label for="protFisico">Físico (%)</label><input id="protFisico" type="number" value="0" step="1"></div>
+      <div class="field"><label for="protFogo">Fogo (%)</label><input id="protFogo" type="number" value="0" step="1"></div>
+      <div class="field"><label for="protGelo">Gelo (%)</label><input id="protGelo" type="number" value="0" step="1"></div>
+      <div class="field"><label for="protEnergia">Energia (%)</label><input id="protEnergia" type="number" value="0" step="1"></div>
+      <div class="field"><label for="protMorte">Morte (%)</label><input id="protMorte" type="number" value="0" step="1"></div>
+      <div class="field"><label for="protLifeDrain">LifeDrain (%)</label><input id="protLifeDrain" type="number" value="0" step="1"></div>
+      <div class="field"><label for="protHoly">Holy (%)</label><input id="protHoly" type="number" value="0" step="1"></div>
+      <div class="field"><label for="protPoison">Poison (%)</label><input id="protPoison" type="number" value="0" step="1"></div>
+    </div>
+
+    <div class="mode-select" role="tablist" aria-label="Modo de entrada">
+      <button id="btnAnalyser" class="mode-btn active">Analyser</button>
+      <button id="btnManual" class="mode-btn">Manualmente</button>
+    </div>
+
+    <div id="analyserBlock">
+      <label for="analyser">ANALYSER (cole o log — será lido o bloco "Killed Monsters:")</label>
+      <textarea id="analyser" placeholder="Cole aqui o log..."></textarea>
+      <div class="actions" style="margin-top:8px">
+        <button id="btnCarregar"><strong>CARREGAR</strong></button>
+      </div>
+    </div>
+
+    <div id="manualBlock" style="display:none;margin-top:12px">
+      <div class="row" style="align-items:center">
+        <div class="field">
+          <label for="nomeMonstro">Nome do Monstro</label>
+          <input id="nomeMonstro" type="text" placeholder="ex: adult goanna">
+        </div>
+        <div class="field">
+          <label for="percentualMonstro">Proporção (%) — relativo ao grupo (será convertido para 10)</label>
+          <input id="percentualMonstro" type="number" step="0.1" placeholder="ex: 25">
+        </div>
+        <div style="flex:0 0 140px">
+          <label>&nbsp;</label>
+          <button id="btnAdicionarMonstro">Adicionar</button>
+        </div>
+      </div>
+    </div>
+
+    <table id="tabelaMonstros">
+      <thead>
+        <tr>
+          <th>Monstro</th>
+          <th>% (proporção)</th>
+          <th>Qtd (de 10)</th>
+          <th>Ataques</th>
+          <th>Remover</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
+      <button id="btnCalcular">CALCULAR</button>
+      <div class="muted" style="margin-left:8px">Ordenado: maior dano médio PREVENIDO pela Dodge → menor</div>
+    </div>
+
+    <div id="resultArea" class="result"></div>
+  </main>
+
+  <div id="attModal" style="display:none" class="modal">
+    <div class="modal-card">
+      <h3 style="margin-top:0">Adicionar ataque</h3>
+      <div style="margin-bottom:8px">
+        <label for="attTipo">Categoria</label>
+        <select id="attTipo">
+          <option value="fisico">Físico</option>
+          <option value="fogo">Fogo</option>
+          <option value="gelo">Gelo</option>
+          <option value="energia">Energia</option>
+          <option value="morte">Morte</option>
+          <option value="lifedrain">LifeDrain</option>
+          <option value="holy">Holy</option>
+          <option value="poison">Poison</option>
+          <option value="outros">Outros</option>
+        </select>
+      </div>
+      <div style="margin-bottom:12px">
+        <label for="attValor">Valor do ataque (dano)</label>
+        <input id="attValor" type="number" step="1" value="100">
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button id="attCancel" class="small-btn">Cancelar</button>
+        <button id="attConfirm" class="small-btn">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const tabelaBody = document.querySelector('#tabelaMonstros tbody');
+const btnAnalyser = document.getElementById('btnAnalyser');
+const btnManual = document.getElementById('btnManual');
+const analyserBlock = document.getElementById('analyserBlock');
+const manualBlock = document.getElementById('manualBlock');
+const btnCarregar = document.getElementById('btnCarregar');
+const btnAdicionarMonstro = document.getElementById('btnAdicionarMonstro');
+const btnCalcular = document.getElementById('btnCalcular');
+const resultArea = document.getElementById('resultArea');
+const attModal = document.getElementById('attModal');
+const attTipo = document.getElementById('attTipo');
+const attValor = document.getElementById('attValor');
+const attCancel = document.getElementById('attCancel');
+const attConfirm = document.getElementById('attConfirm');
+
+let monstros = [];
+let editingMonsterIndex = null;
+
+function ativarModo(modo){
+  monstros = [];
+  atualizarTabela();
+  analyserBlock.style.display = modo === 'analyser' ? '' : 'none';
+  manualBlock.style.display = modo === 'manual' ? '' : 'none';
+  btnAnalyser.classList.toggle('active', modo === 'analyser');
+  btnManual.classList.toggle('active', modo === 'manual');
+  resultArea.innerHTML = '';
+}
+btnAnalyser.onclick = ()=>ativarModo('analyser');
+btnManual.onclick = ()=>ativarModo('manual');
+
+btnAdicionarMonstro.onclick = ()=>{
+  const nome = document.getElementById('nomeMonstro').value.trim();
+  const percentual = parseFloat(document.getElementById('percentualMonstro').value);
+  if(!nome || isNaN(percentual) || percentual <= 0){ alert('Nome e proporção válidos.'); return; }
+  monstros.push({ nome, percentual, attacks: [] });
+  document.getElementById('nomeMonstro').value = '';
+  document.getElementById('percentualMonstro').value = '';
+  atualizarTabela();
+};
+
+function atualizarTabela(){
+  monstros.sort((a,b)=> a.nome.localeCompare(b.nome, 'pt-BR', {sensitivity:'base'}));
+  tabelaBody.innerHTML = '';
+  monstros.forEach((m,i)=>{
+    const qtd10 = (m.percentual||0)/100 * 10;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="text-align:left">${escapeHtml(m.nome)}</td>
+      <td>${m.percentual.toFixed(2)}%</td>
+      <td>${formatNum(qtd10)}</td>
+      <td style="text-align:left">
+        <button class="small-btn" data-i="${i}" data-action="editAtt">Adicionar (${m.attacks.length})</button>
+        <ul class="att-list" id="attlist-${i}"></ul>
+      </td>
+      <td><button class="remove-btn" data-i="${i}">✖</button></td>`;
+    tabelaBody.appendChild(tr);
+    const ul = tr.querySelector(`#attlist-${i}`);
+    if(m.attacks.length===0) ul.innerHTML='<li style="font-style:italic;color:#888">nenhum ataque</li>';
+    else m.attacks.forEach((a,ai)=>{
+      const li=document.createElement('li');
+      li.innerHTML=`<span>${a.tipo} — ${formatNum(a.valor)}</span>
+                    <button class="small-btn" data-i="${i}" data-ai="${ai}" data-action="removeAtt">Remover</button>`;
+      ul.appendChild(li);
+    });
+  });
+  tabelaBody.querySelectorAll('.remove-btn').forEach(b=>{
+    b.onclick=()=>{monstros.splice(Number(b.dataset.i),1); atualizarTabela();}
+  });
+  tabelaBody.querySelectorAll('button[data-action="editAtt"]').forEach(b=>{
+    b.onclick=()=>{editingMonsterIndex=Number(b.dataset.i); showModal(true);}
+  });
+  tabelaBody.querySelectorAll('button[data-action="removeAtt"]').forEach(b=>{
+    b.onclick=()=>{
+      const i=Number(b.dataset.i), ai=Number(b.dataset.ai);
+      monstros[i].attacks.splice(ai,1); atualizarTabela();
+    };
+  });
+}
+
+btnCarregar.onclick=()=>{
+  const texto=document.getElementById('analyser').value||'';
+  const bloco=texto.match(/Killed Monsters:\s*([\s\S]*?)(Looted Items:|$)/i);
+  if(!bloco){alert("Bloco 'Killed Monsters:' não encontrado.");return;}
+  const linhas=bloco[1].split('\n').map(l=>l.trim()).filter(Boolean);
+  const lista=linhas.map(l=>{
+    const m=l.match(/^(\d+)x\s+(.*)$/); return m?{qtd:+m[1],nome:m[2].trim()}:null;
+  }).filter(Boolean);
+  const total=lista.reduce((s,x)=>s+x.qtd,0);
+  monstros=lista.map(x=>({nome:x.nome,percentual:(x.qtd/total)*100,attacks:[]}));
+  atualizarTabela();
+};
+
+function showModal(show){
+  attModal.style.display=show?'flex':'none';
+}
+attCancel.onclick=()=>{showModal(false);};
+attConfirm.onclick=()=>{
+  const tipo=attTipo.value; const valor=+attValor.value||0;
+  if(editingMonsterIndex==null||!monstros[editingMonsterIndex])return;
+  if(valor<=0)return alert('Valor inválido');
+  monstros[editingMonsterIndex].attacks.push({tipo,valor});
+  showModal(false); atualizarTabela();
+};
+
+/* ======= cálculo da Dodge ======= */
+btnCalcular.onclick=()=>{
+  if(monstros.length===0)return alert('Adicione monstros.');
+  const prot={
+    fisico:+protFisico.value||0,
+    fogo:+protFogo.value||0,
+    gelo:+protGelo.value||0,
+    energia:+protEnergia.value||0,
+    morte:+protMorte.value||0,
+    lifedrain:+protLifeDrain.value||0,
+    holy:+protHoly.value||0,
+    poison:+protPoison.value||0,
+    outros:0
+  };
+  const MONSTER_GROUP=10, DODGE_CHANCE=0.10;
+  const computed=monstros.map(m=>{
+    const count=(m.percentual/100)*MONSTER_GROUP;
+    let preventPerInstance=0;
+    m.attacks.forEach(a=>{
+      const tipo=a.tipo.toLowerCase();
+      const valor=a.valor||0;
+      const trigger=(tipo==='fisico')?1:0.3;
+      const eff=(1 - (prot[tipo]||0)/100);
+      preventPerInstance += trigger*DODGE_CHANCE*valor*eff;
+    });
+    return {
+      nome:m.nome,
+      percentual:m.percentual,
+      count,
+      preventedTotal:count*preventPerInstance
+    };
+  }).sort((a,b)=>b.preventedTotal-a.preventedTotal);
+
+  let html=`<div class="small">Considerando proteções do jogador (ataques reduzem conforme resistência).</div>`;
+  html+=`<table><thead><tr><th>Monstro</th><th>Proporção (%)</th><th>Qtd (de 10)</th><th>Dano prevenido médio/turn</th></tr></thead><tbody>`;
+  computed.forEach((c,i)=>{
+    const cls=i===0?'gold':'';
+    html+=`<tr class="${cls}"><td style="text-align:left">${escapeHtml(c.nome)}</td>
+           <td>${c.percentual.toFixed(2)}%</td><td>${formatNum(c.count)}</td>
+           <td><strong>${formatNum(c.preventedTotal)}</strong></td></tr>`;
+  });
+  html+=`</tbody></table><div class="muted">Dourado = monstro mais indicado.</div>`;
+  resultArea.innerHTML=html;
+};
+
+function formatNum(n){return Number(n).toLocaleString('pt-BR',{maximumFractionDigits:2});}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));}
+
+ativarModo('analyser');
+</script>
+</body>
+</html>

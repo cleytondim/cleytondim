@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8" />
-<title>CÁLCULOS DE DODGE</title>
+<title>CÁLCULOS DE DODGE/PARRY</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
   :root{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
@@ -41,7 +41,7 @@
 </head>
 <body>
   <main class="card">
-    <h1>CÁLCULOS DE DODGE</h1>
+    <h1>CÁLCULOS DE DODGE/PARRY</h1>
 
     <div style="margin-bottom:8px" class="small muted">
       Proteções (valores em %)
@@ -103,7 +103,7 @@
 
     <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
       <button id="btnCalcular">CALCULAR</button>
-      <div class="muted" style="margin-left:8px">Ordenado: maior dano médio PREVENIDO pela Dodge → menor</div>
+      <div class="muted" style="margin-left:8px">Ordenado: maior dano médio → menor dano médio</div>
     </div>
 
     <div id="resultArea" class="result"></div>
@@ -138,53 +138,52 @@
   </div>
 
 <script>
-const tabelaBody = document.querySelector('#tabelaMonstros tbody');
-const btnAnalyser = document.getElementById('btnAnalyser');
-const btnManual = document.getElementById('btnManual');
-const analyserBlock = document.getElementById('analyserBlock');
-const manualBlock = document.getElementById('manualBlock');
-const btnCarregar = document.getElementById('btnCarregar');
-const btnAdicionarMonstro = document.getElementById('btnAdicionarMonstro');
-const btnCalcular = document.getElementById('btnCalcular');
-const resultArea = document.getElementById('resultArea');
-const attModal = document.getElementById('attModal');
-const attTipo = document.getElementById('attTipo');
-const attValor = document.getElementById('attValor');
-const attCancel = document.getElementById('attCancel');
-const attConfirm = document.getElementById('attConfirm');
+const tabelaBody=document.querySelector('#tabelaMonstros tbody');
+const btnAnalyser=document.getElementById('btnAnalyser');
+const btnManual=document.getElementById('btnManual');
+const analyserBlock=document.getElementById('analyserBlock');
+const manualBlock=document.getElementById('manualBlock');
+const btnCarregar=document.getElementById('btnCarregar');
+const btnAdicionarMonstro=document.getElementById('btnAdicionarMonstro');
+const btnCalcular=document.getElementById('btnCalcular');
+const resultArea=document.getElementById('resultArea');
+const attModal=document.getElementById('attModal');
+const attTipo=document.getElementById('attTipo');
+const attValor=document.getElementById('attValor');
+const attCancel=document.getElementById('attCancel');
+const attConfirm=document.getElementById('attConfirm');
 
-let monstros = [];
-let editingMonsterIndex = null;
+let monstros=[];
+let editingMonsterIndex=null;
 
 function ativarModo(modo){
-  monstros = [];
-  atualizarTabela();
-  analyserBlock.style.display = modo === 'analyser' ? '' : 'none';
-  manualBlock.style.display = modo === 'manual' ? '' : 'none';
-  btnAnalyser.classList.toggle('active', modo === 'analyser');
-  btnManual.classList.toggle('active', modo === 'manual');
-  resultArea.innerHTML = '';
+  monstros=[]; atualizarTabela();
+  analyserBlock.style.display=modo==='analyser'?'':'none';
+  manualBlock.style.display=modo==='manual'?'':'none';
+  btnAnalyser.classList.toggle('active',modo==='analyser');
+  btnManual.classList.toggle('active',modo==='manual');
+  resultArea.innerHTML='';
 }
-btnAnalyser.onclick = ()=>ativarModo('analyser');
-btnManual.onclick = ()=>ativarModo('manual');
+btnAnalyser.onclick=()=>ativarModo('analyser');
+btnManual.onclick=()=>ativarModo('manual');
 
-btnAdicionarMonstro.onclick = ()=>{
-  const nome = document.getElementById('nomeMonstro').value.trim();
-  const percentual = parseFloat(document.getElementById('percentualMonstro').value);
-  if(!nome || isNaN(percentual) || percentual <= 0){ alert('Nome e proporção válidos.'); return; }
-  monstros.push({ nome, percentual, attacks: [] });
-  document.getElementById('nomeMonstro').value = '';
-  document.getElementById('percentualMonstro').value = '';
+btnAdicionarMonstro.onclick=()=>{
+  const nome=document.getElementById('nomeMonstro').value.trim();
+  const percentual=parseFloat(document.getElementById('percentualMonstro').value);
+  if(!nome||isNaN(percentual)||percentual<=0){alert('Nome e proporção válidos.');return;}
+  monstros.push({nome,percentual,attacks:[]});
+  document.getElementById('nomeMonstro').value='';
+  document.getElementById('percentualMonstro').value='';
   atualizarTabela();
 };
 
 function atualizarTabela(){
-  monstros.sort((a,b)=> a.nome.localeCompare(b.nome, 'pt-BR', {sensitivity:'base'}));
-  tabelaBody.innerHTML = '';
+  monstros.sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR',{sensitivity:'base'}));
+  tabelaBody.innerHTML='';
   monstros.forEach((m,i)=>{
-    const qtd10 = (m.percentual||0)/100 * 10;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
+    const qtd10=(m.percentual||0)/100*10;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
       <td style="text-align:left">${escapeHtml(m.nome)}</td>
       <td>${m.percentual.toFixed(2)}%</td>
       <td>${formatNum(qtd10)}</td>
@@ -194,25 +193,25 @@ function atualizarTabela(){
       </td>
       <td><button class="remove-btn" data-i="${i}">✖</button></td>`;
     tabelaBody.appendChild(tr);
-    const ul = tr.querySelector(`#attlist-${i}`);
-    if(m.attacks.length===0) ul.innerHTML='<li style="font-style:italic;color:#888">nenhum ataque</li>';
+    const ul=tr.querySelector(`#attlist-${i}`);
+    if(m.attacks.length===0)ul.innerHTML='<li style="font-style:italic;color:#888">nenhum ataque</li>';
     else m.attacks.forEach((a,ai)=>{
       const li=document.createElement('li');
       li.innerHTML=`<span>${a.tipo} — ${formatNum(a.valor)}</span>
-                    <button class="small-btn" data-i="${i}" data-ai="${ai}" data-action="removeAtt">Remover</button>`;
+      <button class="small-btn" data-i="${i}" data-ai="${ai}" data-action="removeAtt">Remover</button>`;
       ul.appendChild(li);
     });
   });
   tabelaBody.querySelectorAll('.remove-btn').forEach(b=>{
-    b.onclick=()=>{monstros.splice(Number(b.dataset.i),1); atualizarTabela();}
+    b.onclick=()=>{monstros.splice(Number(b.dataset.i),1);atualizarTabela();}
   });
   tabelaBody.querySelectorAll('button[data-action="editAtt"]').forEach(b=>{
-    b.onclick=()=>{editingMonsterIndex=Number(b.dataset.i); showModal(true);}
+    b.onclick=()=>{editingMonsterIndex=Number(b.dataset.i);showModal(true);}
   });
   tabelaBody.querySelectorAll('button[data-action="removeAtt"]').forEach(b=>{
     b.onclick=()=>{
-      const i=Number(b.dataset.i), ai=Number(b.dataset.ai);
-      monstros[i].attacks.splice(ai,1); atualizarTabela();
+      const i=Number(b.dataset.i),ai=Number(b.dataset.ai);
+      monstros[i].attacks.splice(ai,1);atualizarTabela();
     };
   });
 }
@@ -223,69 +222,70 @@ btnCarregar.onclick=()=>{
   if(!bloco){alert("Bloco 'Killed Monsters:' não encontrado.");return;}
   const linhas=bloco[1].split('\n').map(l=>l.trim()).filter(Boolean);
   const lista=linhas.map(l=>{
-    const m=l.match(/^(\d+)x\s+(.*)$/); return m?{qtd:+m[1],nome:m[2].trim()}:null;
+    const m=l.match(/^(\d+)x\s+(.*)$/);return m?{qtd:+m[1],nome:m[2].trim()}:null;
   }).filter(Boolean);
   const total=lista.reduce((s,x)=>s+x.qtd,0);
   monstros=lista.map(x=>({nome:x.nome,percentual:(x.qtd/total)*100,attacks:[]}));
   atualizarTabela();
 };
 
-function showModal(show){
-  attModal.style.display=show?'flex':'none';
-}
-attCancel.onclick=()=>{showModal(false);};
+function showModal(show){attModal.style.display=show?'flex':'none';}
+attCancel.onclick=()=>showModal(false);
 attConfirm.onclick=()=>{
-  const tipo=attTipo.value; const valor=+attValor.value||0;
+  const tipo=attTipo.value;const valor=+attValor.value||0;
   if(editingMonsterIndex==null||!monstros[editingMonsterIndex])return;
   if(valor<=0)return alert('Valor inválido');
   monstros[editingMonsterIndex].attacks.push({tipo,valor});
-  showModal(false); atualizarTabela();
+  showModal(false);atualizarTabela();
 };
 
-/* ======= cálculo da Dodge ======= */
+/* ======= cálculo da Dodge e Parry ======= */
 btnCalcular.onclick=()=>{
   if(monstros.length===0)return alert('Adicione monstros.');
   const prot={
-    fisico:+protFisico.value||0,
-    fogo:+protFogo.value||0,
-    gelo:+protGelo.value||0,
-    energia:+protEnergia.value||0,
-    morte:+protMorte.value||0,
-    lifedrain:+protLifeDrain.value||0,
-    holy:+protHoly.value||0,
-    poison:+protPoison.value||0,
-    outros:0
+    fisico:+protFisico.value||0,fogo:+protFogo.value||0,gelo:+protGelo.value||0,
+    energia:+protEnergia.value||0,morte:+protMorte.value||0,lifedrain:+protLifeDrain.value||0,
+    holy:+protHoly.value||0,poison:+protPoison.value||0,outros:0
   };
-  const MONSTER_GROUP=10, DODGE_CHANCE=0.10;
-  const computed=monstros.map(m=>{
-    const count=(m.percentual/100)*MONSTER_GROUP;
-    let preventPerInstance=0;
-    m.attacks.forEach(a=>{
-      const tipo=a.tipo.toLowerCase();
-      const valor=a.valor||0;
-      const trigger=(tipo==='fisico')?1:0.3;
-      const eff=(1 - (prot[tipo]||0)/100);
-      preventPerInstance += trigger*DODGE_CHANCE*valor*eff;
-    });
-    return {
-      nome:m.nome,
-      percentual:m.percentual,
-      count,
-      preventedTotal:count*preventPerInstance
-    };
-  }).sort((a,b)=>b.preventedTotal-a.preventedTotal);
+  const MONSTER_GROUP=10,DODGE_CHANCE=0.10;
 
-  let html=`<div class="small">Considerando proteções do jogador (ataques reduzem conforme resistência).</div>`;
-  html+=`<table><thead><tr><th>Monstro</th><th>Proporção (%)</th><th>Qtd (de 10)</th><th>Dano prevenido médio/turn</th></tr></thead><tbody>`;
-  computed.forEach((c,i)=>{
+  function calcular(ignoreProtections=false){
+    return monstros.map(m=>{
+      const count=(m.percentual/100)*MONSTER_GROUP;
+      let preventPerInstance=0;
+      m.attacks.forEach(a=>{
+        const tipo=a.tipo.toLowerCase();
+        const valor=a.valor||0;
+        const trigger=(tipo==='fisico')?1:0.3;
+        const eff=ignoreProtections?1:(1-(prot[tipo]||0)/100);
+        preventPerInstance+=trigger*DODGE_CHANCE*valor*eff;
+      });
+      return {nome:m.nome,percentual:m.percentual,count,preventedTotal:count*preventPerInstance};
+    }).sort((a,b)=>b.preventedTotal-a.preventedTotal);
+  }
+
+  const dodge=calcular(false);
+  const parry=calcular(true);
+
+  let html=`<h3>DODGE</h3><div class="small">Dano prevenido considerando proteções do jogador (resistências aplicadas).</div>`;
+  html+=montarTabela(dodge);
+  html+=`<br><h3>PARRY</h3><div class="small">Dano refletido.</div>`;
+  html+=montarTabela(parry);
+
+  resultArea.innerHTML=html;
+};
+
+function montarTabela(lista){
+  let html=`<table><thead><tr><th>Monstro</th><th>Proporção (%)</th><th>Qtd (de 10)</th><th>Dano médio/turn</th></tr></thead><tbody>`;
+  lista.forEach((c,i)=>{
     const cls=i===0?'gold':'';
     html+=`<tr class="${cls}"><td style="text-align:left">${escapeHtml(c.nome)}</td>
            <td>${c.percentual.toFixed(2)}%</td><td>${formatNum(c.count)}</td>
            <td><strong>${formatNum(c.preventedTotal)}</strong></td></tr>`;
   });
   html+=`</tbody></table><div class="muted">Dourado = monstro mais indicado.</div>`;
-  resultArea.innerHTML=html;
-};
+  return html;
+}
 
 function formatNum(n){return Number(n).toLocaleString('pt-BR',{maximumFractionDigits:2});}
 function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));}

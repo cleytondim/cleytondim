@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script src="creature_data.js"></script>
 <meta charset="utf-8" />
 <title>Comparador de Runas</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -22,6 +23,8 @@ textarea{min-height:120px;font-family:monospace}
 #btnCarregar:hover,#btnAdicionarMonstro:hover{background:#ffa500}
 #btnCalcular{background:#9fe6a8;border:0;color:#063;font-weight:800;cursor:pointer;padding:10px 14px;border-radius:8px}
 #btnCalcular:hover{background:#78d488}
+#btnDadosWiki { background-color: #dad372; color:rgb(243, 79, 4); border:none; padding:10px 18px; border-radius:8px; width: 25%; font-weight:700; cursor:pointer; margin-top:10px; }
+#btnDadosWiki:hover { background-color:#eed12b; }
 table{width:100%;border-collapse:collapse;margin-top:14px}
 th,td{border:1px solid #e3e7ee;padding:6px;text-align:center;font-size:13px}
 th{background:#f3f6fb}
@@ -126,6 +129,7 @@ th{background:#f3f6fb}
   </table>
 
   <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
+    <button id="btnDadosWiki">DADOS WIKI</button>
     <button id="btnCalcular">CALCULAR</button>
     <div class="muted" style="margin-left:8px">Resultado ordenado: runa mais eficiente → menos eficiente</div>
   </div>
@@ -151,6 +155,7 @@ const btnCalcular = document.getElementById('btnCalcular');
 const resultArea = document.getElementById('resultArea');
 const runicMs = document.getElementById('runicMs');
 const runicEd = document.getElementById('runicEd');
+const btnDadosWiki = document.getElementById("btnDadosWiki");
 
 
 let monstros = [];
@@ -261,7 +266,61 @@ runicEd.addEventListener('change', ()=>{
 });
 
 
+btnDadosWiki.onclick = () => {
+  // assume que creature_resistances.js já está carregado e expõe objeto "creatureData"
+  // formato esperado:
+  // creatureData = { "arctic faun": {health: 21000, death: 0, energy: 110, physical: 100, fire: 110, ice: 80, holy: 100, earth: 0}, ...}
+
+  monstros.forEach((m, idx) => {
+    const nameKey = m.nome.toLowerCase();
+    const wikiInfo = creatureData[nameKey];
+    if(wikiInfo){
+      
+      const row = tabelaBody.children[idx];
+      if(!row) return;
+      const inputs = row.querySelectorAll("input");
+
+      if(inputs.length >= 5){
+        if(wikiInfo.health !== undefined) inputs[0].value = wikiInfo.health;
+        if(wikiInfo.resistances.Ice !== undefined) inputs[1].value = wikiInfo.resistances.Ice;
+        if(wikiInfo.resistances.Fire !== undefined) inputs[2].value = wikiInfo.resistances.Fire;
+        if(wikiInfo.resistances.Earth !== undefined) inputs[3].value = wikiInfo.resistances.Earth;
+        if(wikiInfo.resistances.Energy !== undefined) inputs[4].value = wikiInfo.resistances.Energy;
+        
+      }
+    }
+  });
+  alert("Dados Wiki aplicados (quando encontrados)!");
+};
+
+
+function ajustaMonstros(){
+  const linhas = tabelaBody.querySelectorAll('tr');
+  const novos = [];
+
+  linhas.forEach((linha, idx) => {
+    const nome = linha.cells[0]?.textContent?.trim() || '';
+    const inputs = linha.querySelectorAll('input[type="number"]');
+
+    if(inputs.length >= 5){
+      const life = parseFloat(inputs[0].value) || 0;
+      const gelo = parseFloat(inputs[1].value) || 0;
+      const fogo = parseFloat(inputs[2].value) || 0;
+      const poison = parseFloat(inputs[3].value) || 0;
+      const energia = parseFloat(inputs[4].value) || 0;
+      novos.push({ nome, life, gelo, fogo, poison, energia });
+    }
+  });
+
+  monstros = novos;
+}
+
+
+
 btnCalcular.addEventListener('click', ()=>{
+  
+  ajustaMonstros();
+
   if(monstros.length === 0){ alert('Adicione ou carregue monstros primeiro.'); return; }
 
   const monstrosSelecionados = monstros.filter((m, i) => {
@@ -302,7 +361,7 @@ btnCalcular.addEventListener('click', ()=>{
     const dmgAvg = avgRuneDamage(runeName, lvl, mlCalculado);
     //const dmgAvg = avgRuneDamage(runeName,lvl,ml);
     const sensKey = RUNES[runeName].el;
-
+ 
     let maxRunes = 0;
     monstrosSelecionados.forEach(m=>{
       const sens = Number(m[sensKey]) || 0;

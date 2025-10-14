@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <script src="creature_data.js"></script>
   <meta charset="UTF-8">
   <title>ALOCADOR DE CHARMS</title>
   <style>
@@ -35,6 +36,8 @@
     #btnCarregar:hover, #btnAdicionarMonstro:hover { background-color: #ffa500; }
     #btnCalcular { background-color: #a8e6a1; color:#063; border:none; padding:10px 18px; border-radius:8px; font-weight:700; cursor:pointer; margin-top:10px; }
     #btnCalcular:hover { background-color:#8fdb82; }
+    #btnDadosWiki { background-color: #dad372; color:rgb(243, 79, 4); border:none; padding:10px 18px; border-radius:8px; width: 25%; font-weight:700; cursor:pointer; margin-top:10px; }
+    #btnDadosWiki:hover { background-color:#eed12b; }
     .result-table { margin-top:12px; }
     .small-note { font-size:12px;color:#555;margin-top:6px; }
   </style>
@@ -130,7 +133,11 @@
     <tbody></tbody>
   </table>
 
-  <button id="btnCalcular">CALCULAR</button>
+  <div class="mode-select">
+    <button id="btnDadosWiki">DADOS WIKI</button>
+
+    <button id="btnCalcular">CALCULAR</button>
+  </div>
 
   <!-- Results -->
   <div class="result-table" id="resultArea"></div>
@@ -148,13 +155,29 @@
     const btnCarregar = document.getElementById("btnCarregar");
     const btnCalcular = document.getElementById("btnCalcular");
     const resultArea = document.getElementById("resultArea");
+    const btnDadosWiki = document.getElementById("btnDadosWiki");
 
     let monstros = []; // objetos: {nome, percentual, life, death, divine, energia, fisico, fogo, gelo, poison}
+
+    const mycharms = [
+      "Curse",
+      "Divine Wrath",
+      "Enflame",
+      "Freeze",
+      "Poison",
+      "Wound",
+      "Zap",
+      "Low Blow",
+      "Overflux"
+    ];
 
     // renderizar botões de charms
     charms.forEach(name=>{
       const b = document.createElement("div");
       b.className = "charm-btn";
+      if(mycharms.includes(name)){
+        b.className = "charm-btn active";
+      }
       b.textContent = name;
       b.dataset.name = name;
       b.addEventListener("click", ()=> b.classList.toggle("active"));
@@ -234,11 +257,11 @@
             // columns: 0 name, 1 percentual, 2 life, 3 death, 4 divine, 5 energia, 6 fisico, 7 fogo, 8 gelo, 9 poison, 10 action
             switch(cellIndex){
               case 3: m.death = parseFloat(input.value)||0; break;
-              case 5: m.energia = parseFloat(input.value)||0; break;
-              case 6: m.fisico = parseFloat(input.value)||0; break;
-              case 7: m.fogo = parseFloat(input.value)||0; break;
-              case 8: m.gelo = parseFloat(input.value)||0; break;
-              case 4: m.divine = parseFloat(input.value)||0; break;
+              case 4: m.energia = parseFloat(input.value)||0; break;
+              case 5: m.fisico = parseFloat(input.value)||0; break;
+              case 6: m.fogo = parseFloat(input.value)||0; break;
+              case 7: m.gelo = parseFloat(input.value)||0; break;
+              case 8: m.divine = parseFloat(input.value)||0; break;
               case 9: m.poison = parseFloat(input.value)||0; break;
               default: break;
             }
@@ -387,6 +410,36 @@
       }
     }
 
+
+    btnDadosWiki.onclick = () => {
+      // assume que creature_resistances.js já está carregado e expõe objeto "creatureData"
+      // formato esperado:
+      // creatureData = { "arctic faun": {health: 21000, death: 0, energy: 110, physical: 100, fire: 110, ice: 80, holy: 100, earth: 0}, ...}
+
+      monstros.forEach((m, idx) => {
+        const nameKey = m.nome.toLowerCase();
+        const wikiInfo = creatureData[nameKey];
+        if(wikiInfo){
+          const row = tabelaMonstros.children[idx];
+          if(!row) return;
+          const inputs = row.querySelectorAll("input.table-input, input.p-input, input.life-input");
+
+          if(inputs.length >= 9){
+            if(wikiInfo.health !== undefined) inputs[1].value = wikiInfo.health;
+            if(wikiInfo.resistances.Death !== undefined) inputs[2].value = wikiInfo.resistances.Death;
+            if(wikiInfo.resistances.Energy !== undefined) inputs[3].value = wikiInfo.resistances.Energy;
+            if(wikiInfo.resistances.Physical !== undefined) inputs[4].value = wikiInfo.resistances.Physical;
+            if(wikiInfo.resistances.Fire !== undefined) inputs[5].value = wikiInfo.resistances.Fire;
+            if(wikiInfo.resistances.Ice !== undefined) inputs[6].value = wikiInfo.resistances.Ice;
+            if(wikiInfo.resistances.Holy !== undefined) inputs[7].value = wikiInfo.resistances.Holy;
+            if(wikiInfo.resistances.Earth !== undefined) inputs[8].value = wikiInfo.resistances.Earth;
+          }
+        }
+      });
+      
+      alert("Dados Wiki aplicados (quando encontrados)!");
+    };
+
     // função principal: para cada monstro, entre os charms selecionados, escolhe charm que maximiza o dano ponderado
     btnCalcular.onclick = () => {
       const selected = getSelectedCharms();
@@ -407,32 +460,44 @@
         if (!cells || cells.length < 9) return;
         monstros[idx].percentual = parseFloat(cells[0].value) || 0;
         monstros[idx].life = parseFloat(cells[1].value) || 0;
-        monstros[idx].death = parseFloat(cells[2].value) || 100;
-        monstros[idx].energia = parseFloat(cells[3].value) || 100;
-        monstros[idx].fisico = parseFloat(cells[4].value) || 100;
-        monstros[idx].fogo = parseFloat(cells[5].value) || 100;
-        monstros[idx].gelo = parseFloat(cells[6].value) || 100;
-        monstros[idx].divine = parseFloat(cells[7].value) || 100;
-        monstros[idx].poison = parseFloat(cells[8].value) || 100;
+        monstros[idx].death = parseFloat(cells[2].value) || 0;
+        monstros[idx].energia = parseFloat(cells[3].value) || 0;
+        monstros[idx].fisico = parseFloat(cells[4].value) || 0;
+        monstros[idx].fogo = parseFloat(cells[5].value) || 0;
+        monstros[idx].gelo = parseFloat(cells[6].value) || 0;
+        monstros[idx].divine = parseFloat(cells[7].value) || 0;
+        monstros[idx].poison = parseFloat(cells[8].value) || 0;
       });
 
       normalizarPercentuais();
 
-      // limitar charms ao número de monstros
-      const charmsUsados = selected.slice(0, monstros.length);
+     // número de charms que podemos atribuir (no máximo um por monstro)
+    const k = Math.min(selected.length, monstros.length);
 
-      // gerar todas as permutações possíveis dos charms selecionados (sem repetir)
-      function gerarPermutacoes(arr) {
-        if (arr.length <= 1) return [arr];
-        const perms = [];
-        arr.forEach((el, i) => {
-          const resto = [...arr.slice(0, i), ...arr.slice(i + 1)];
-          gerarPermutacoes(resto).forEach(p => perms.push([el, ...p]));
-        });
-        return perms;
+    // gera todas as permutações de k elementos a partir de arr (k-permutations)
+    function permuteK(arr, k) {
+      const results = [];
+      const used = new Array(arr.length).fill(false);
+      function backtrack(curr) {
+        if (curr.length === k) {
+          results.push(curr.slice());
+          return;
+        }
+        for (let i = 0; i < arr.length; i++) {
+          if (used[i]) continue;
+          used[i] = true;
+          curr.push(arr[i]);
+          backtrack(curr);
+          curr.pop();
+          used[i] = false;
+        }
       }
+      if (k === 0) return [[]]; // caso especial: nenhum charm disponível
+      backtrack([]);
+      return results;
+    }
 
-      const perms = gerarPermutacoes(charmsUsados);
+    const perms = permuteK(selected, k);
 
       let melhorCombinacao = null;
       let melhorDanoTotal = -Infinity;
